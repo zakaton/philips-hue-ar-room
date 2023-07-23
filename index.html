@@ -1,0 +1,83 @@
+<html>
+  <head>
+    <title>Philips Hue AR Room</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="src/components/persistent-anchors-component.js"></script>
+    <script src="src/components/camera-controls-component.js"></script>
+    <script src="src/components/philips-hue-component.js"></script>
+    <script src="src/components/detected-planes-component.js"></script>
+  </head>
+  <body>
+    <a-scene
+      shadow="type: pcfsoft"
+      renderer=" colorManagement:true; toneMapping:ACESFilmic;"
+      persistent-anchors="target: #sceneContainer; targetAnchor: #internalAnchor;"
+      webxr="optionalFeatures: anchors; requiredFeatures: plane-detection,local-floor;"
+      detected-planes
+    >
+      <a-assets>
+        <a-asset-item id="roomModel" src="assets/room.glb"></a-asset-item>
+        <a-asset-item id="anchorModel" src="assets/anchor.glb"></a-asset-item>
+      </a-assets>
+
+      <a-entity visible="false" id="anchor">
+        <a-box scale="0.01 0.01 0.01" color="red" visible="false"></a-box>
+        <a-entity position="0 -0.2 -0.1">
+          <a-entity
+            gltf-model="#anchorModel"
+            scale="0.020 0.020 0.020"
+            position="0 0.119 0"
+            rotation="0 0 0"
+          ></a-entity>
+        </a-entity>
+      </a-entity>
+
+      <a-camera position="0 1.6 0" id="camera"></a-camera>
+
+      <a-entity
+        id="leftHandControls"
+        oculus-touch-controls="hand: left; model: false;"
+        camera-controls="hand: left;"
+      ></a-entity>
+      <a-entity
+        id="rightHandControls"
+        oculus-touch-controls="hand: right; model: false;"
+        camera-controls="hand: right;"
+      >
+        <a-box visible="false" color="red" scale="0.01 0.01 0.01"></a-box>
+        <a-entity position="0 -0.2 -0.1" id="handAnchor">
+          <a-entity
+            gltf-model="#anchorModel"
+            scale="0.020 0.020 0.020"
+            position="0 0.119 0"
+            rotation="0 0 0"
+          ></a-entity>
+        </a-entity>
+      </a-entity>
+
+      <a-entity id="sceneContainer">
+        <a-entity id="internalAnchor" position="0.668 1.02778 -2.143">
+          <a-entity position="0 -0.2 -0.1">
+            <a-entity
+              gltf-model="#anchorModel"
+              scale="0.020 0.020 0.020"
+              position="0 0.119 0"
+              rotation="0 0 0"
+            ></a-entity>
+          </a-entity>
+        </a-entity>
+        <a-entity
+          data-toggle-visibility
+          data-color-write="true"
+          gltf-model="#roomModel"
+          position="0 0 0"
+          scale="1 1 1"
+          shadow="receive: true; cast: false;"
+          rotation="0 0 0"
+          id="room"
+        ></a-entity>
+      </a-entity>
+    </a-scene>
+  </body>
+  <script></script>
+</html>
