@@ -42,7 +42,7 @@ AFRAME.registerComponent("camera-controls", {
   toggleVisibility: function () {
     this.showEntities = !this.showEntities;
     this.data.toggleVisibility.forEach((entity) => {
-      if (entity.dataset.colorWrite) {
+      if (entity.dataset.colorWrite == "true") {
         const gltfModel = entity.components["gltf-model"]?.model;
         if (gltfModel) {
           gltfModel.traverseVisible((x) => {

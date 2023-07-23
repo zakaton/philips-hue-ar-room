@@ -107,4 +107,4 @@ certificate
 .vscode
 .DS_Store
 *.txt
-*.glb
+room.glb

@@ -69,7 +69,7 @@ AFRAME.registerSystem("detected-planes", {
         planeEntity.object3D.quaternion.copy(planePose.transform.orientation);
         planeEntity.object3D.quaternion.multiply(correctionQuaternion);
         planeEntity.dataset.detectedPlane = "";
-        planeEntity.setAttribute("visible", "false");
+        planeEntity.setAttribute("visible", "true");
         planeEntity.classList.add("allow-ray");
         this.sceneEl.appendChild(planeEntity);
         this.detectedPlaneEntities.push(planeEntity);

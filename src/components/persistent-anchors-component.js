@@ -35,7 +35,11 @@ AFRAME.registerSystem("persistent-anchors", {
           console.log("known anchor:");
           for (let i = 0; i < anchors.length; i++) {
             console.log(i + ": " + anchors[i]);
-            this.frame.session.deletePersistentAnchor(anchors[i]);
+            try {
+              //this.frame.session.deletePersistentAnchor(anchors[i]);
+            } catch (e) {
+              console.log(e);
+            }
           }
         }
         if (localStorage.anchor) {
@@ -144,8 +148,12 @@ AFRAME.registerSystem("persistent-anchors", {
     const frame = this.sceneEl.renderer.xr.getFrame();
     if (this.anchor) {
       console.log("removing persistant anchor");
-      await frame.session.deletePersistentAnchor(this.anchor.uuid);
-      await this.anchor.delete();
+      try {
+        await frame.session.deletePersistentAnchor(this.anchor.uuid);
+        await this.anchor.delete();
+      } catch (e) {
+        console.log(e);
+      }
       delete this.anchor;
       localStorage.removeItem("anchor");
     }
