@@ -82,5 +82,16 @@
       </a-entity>
     </a-scene>
   </body>
-  <script></script>
+  <script>
+    const socket = new WebSocket(`ws://${location.host}/`);
+    socket.addEventListener("open", () => {
+      console.log("connection opened");
+    });
+    socket.addEventListener("close", () => {
+      console.log("connection closed");
+    });
+    const messageSocket = (object) => {
+      socket.send(JSON.stringify(object));
+    };
+  </script>
 </html>

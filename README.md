@@ -11,6 +11,8 @@ also create a file `philips-hue-credentials.js` based on `_philips-hue-credentia
 
 also comment out lines 32 and 44 of hue-bridge.js under /node_modules/phea/build/hue-bridge.js for group id's outside the range
 
+turn firewall off
+
 install https://code.visualstudio.com/ & https://nodejs.org/en/
 install npm in terminal: sudo npm install
 install yarn in VS Code terminal: yarn install
