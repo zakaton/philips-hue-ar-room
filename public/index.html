@@ -1,16 +1,19 @@
 <html>
   <head>
     <title>Philips Hue AR Room</title>
-    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script crossorigin="anonymous" src="src/aframe.min.js"></script>
     <script src="src/components/persistent-anchors-component.js"></script>
     <script src="src/components/camera-controls-component.js"></script>
+    <script src="src/PhilipsHue.js"></script>
     <script src="src/components/philips-hue-component.js"></script>
     <script src="src/components/detected-planes-component.js"></script>
+    <!-- https://github.com/gftruj/aframe-hand-tracking-controls-extras -->
+    <script src="src/components/hand-tracking-controls-extras.js"></script>
   </head>
   <body>
     <a-scene
       shadow="type: pcfsoft"
-      renderer=" colorManagement:true; toneMapping:ACESFilmic;"
+      renderer="colorManagement:true; toneMapping:ACESFilmic;"
       persistent-anchors="target: #sceneContainer; targetAnchor: #internalAnchor;"
       webxr="optionalFeatures: anchors; requiredFeatures: plane-detection,local-floor;"
       detected-planes

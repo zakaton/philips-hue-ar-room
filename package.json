@@ -1,0 +1,15 @@
+{
+  "name": "philips-hue-ar-room",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/zakaton/philips-hue-ar-room",
+  "author": "Zack <zack@ukaton.com>",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "phea": "^1.0.6",
+    "ws": "^8.11.0"
+  }
+}

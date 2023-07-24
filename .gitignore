@@ -108,3 +108,5 @@ certificate
 .DS_Store
 *.txt
 room.glb
+philips-hue-credentials.js
+sec
