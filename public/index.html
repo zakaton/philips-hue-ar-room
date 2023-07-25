@@ -12,6 +12,7 @@
   </head>
   <body>
     <a-scene
+      light="defaultLightsEnabled: false"
       shadow="type: pcfsoft"
       renderer="colorManagement:true; toneMapping:ACESFilmic;"
       persistent-anchors="target: #sceneContainer; targetAnchor: #internalAnchor;"
@@ -58,7 +59,7 @@
         </a-entity>
       </a-entity>
 
-      <a-entity id="sceneContainer">
+      <a-entity id="sceneContainer" position="0 1 -3.219">
         <a-entity id="internalAnchor" position="0 0 0">
           <a-entity position="0 -0.2 -0.1">
             <a-entity
@@ -69,6 +70,7 @@
             ></a-entity>
           </a-entity>
         </a-entity>
+
         <a-entity
           data-toggle-visibility
           data-color-write="false"
@@ -79,19 +81,111 @@
           rotation="0 0 0"
           id="room"
         ></a-entity>
+
+        <a-entity
+          philips-hue="bridge: 0; light: 1;"
+          id="livingRoomLightBR"
+          position="1.135 0.000 2.831"
+        ></a-entity>
+
+        <a-entity
+          philips-hue="bridge: 0; light: 2;"
+          id="livingRoomLightBL"
+          position="1.422 0 5.749"
+        ></a-entity>
+
+        <a-entity
+          philips-hue="bridge: 0; light: 3;"
+          id="kitchenLight1"
+          position="-0.868 1.673 0.521"
+        ></a-entity>
+        <a-entity
+          philips-hue="bridge: 0; light: 4;"
+          id="livingRoomBRA"
+          position="1.607 0.778 2.536"
+        ></a-entity>
+        <a-entity
+          philips-hue="bridge: 0; light: 5;"
+          id="livingRoomFLA"
+          position="-2.195 0.743 6.178"
+        ></a-entity>
+        <a-entity
+          philips-hue="bridge: 0; light: 6;"
+          id="kitchenLight4"
+          position="0.638 1.673 1.496"
+        ></a-entity>
+        <a-entity
+          philips-hue="bridge: 0; light: 7;"
+          id="livingRoomFLB"
+          position="-2.195 0.743 6.178"
+        ></a-entity>
+        <a-entity
+          philips-hue="bridge: 0; light: 8;"
+          id="kitchenLight3"
+          position="1.473 1.673 1.301"
+        ></a-entity>
+        <a-entity
+          philips-hue="bridge: 0; light: 9;"
+          id="kitchenLight5"
+          position="-0.898 1.673 1.546"
+        ></a-entity>
+        <a-entity
+          philips-hue="bridge: 0; light: 10;"
+          id="livingRoomBRB"
+          position="1.607 0.778 2.536"
+        ></a-entity>
+        <a-entity
+          philips-hue="bridge: 0; light: 11;"
+          id="kitchenLight2"
+          position="0.690 1.673 0.511"
+        ></a-entity>
+        <a-entity
+          philips-hue="bridge: 0; light: 12;"
+          id="livingRoomFRB"
+          position="-1.806 0.148 2.978"
+        ></a-entity>
+        <a-entity
+          philips-hue="bridge: 0; light: 13;"
+          id="livingRoomFRA"
+          position="-1.858 0.782 2.722"
+        ></a-entity>
       </a-entity>
     </a-scene>
   </body>
   <script>
-    const socket = new WebSocket(`ws://${location.host}/`);
-    socket.addEventListener("open", () => {
-      console.log("connection opened");
-    });
-    socket.addEventListener("close", () => {
-      console.log("connection closed");
-    });
-    const messageSocket = (object) => {
-      socket.send(JSON.stringify(object));
-    };
+    function setupWebsocketConnection(onMessage, onConnect) {
+      // Create WebSocket connection.
+      let socket;
+
+      const createSocket = () => {
+        socket = window.socket = new WebSocket(`ws://${location.host}/`);
+
+        socket.addEventListener("open", () => {
+          console.log("connection opened");
+          if (onConnect) {
+            onConnect();
+          }
+        });
+        socket.addEventListener("message", (event) => {
+          //console.log("Message from server ", event.data);
+          const message = JSON.parse(event.data);
+          if (onMessage) {
+            onMessage(message);
+          }
+        });
+        socket.addEventListener("close", (event) => {
+          console.log("connection closed");
+          createSocket();
+        });
+      };
+      createSocket();
+
+      const send = (object) => {
+        socket.send(JSON.stringify(object));
+      };
+
+      return send;
+    }
+    window.sendMessage = setupWebsocketConnection();
   </script>
 </html>
