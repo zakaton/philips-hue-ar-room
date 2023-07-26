@@ -1,8 +1,16 @@
 AFRAME.registerSystem("philips-hue", {
   schema: {
-    mode: { default: "scene", oneOf: ["scene", "gaze", "torch", "flashlight"] },
+    mode: {
+      default: "scene",
+      oneOf: ["scene", "gaze", "torch", "flashlight", "virtual"],
+    },
     colorDifferenceThreshold: { type: "number", default: 0.01 },
     intensityScalar: { type: "number", default: 0.1 },
+    virtualLights: {
+      type: "selectorAll",
+      default: "[data-virtual-light]",
+    },
+    debug: { type: "boolean", default: true },
   },
 
   init: function () {
@@ -34,7 +42,6 @@ AFRAME.registerSystem("philips-hue", {
         const { philipsHue } = entity;
         if (philipsHue && philipsHue.light.hasLoaded) {
           const { bridge: bridgeIndex, light: lightIndex } = philipsHue.data;
-          const { color } = philipsHue;
           let { intensity } = philipsHue;
           const newColor = philipsHue._color;
           switch (this.data.mode) {
@@ -50,12 +57,26 @@ AFRAME.registerSystem("philips-hue", {
               break;
             case "gaze":
               // FILL
+              // get ray from camera
+              // get distance/offset of entity from ray
+              // set intensity to be high as distance/offset is low, interpolated by min/max threshold
               break;
             case "torch":
               // FILL
+              // get distance from right controller torch
+              // set color from orange/yellow based on distance
+              // set intensity based on torch distance
+              // add flickering (proportional to distance)
               break;
             case "flashlight":
               // FILL
+              // ray stuff but with controller
+              break;
+            case "virtual":
+              // FILL
+              // get distance from virtual lights
+              // set intensity/color based on [data-virtual-intensity] and [data-virtual-color]
+              // also take boundary mesh into consideration (so scaling affects light)
               break;
             default:
               console.warn(`uncaught mode "${this.data.mode}"`);
@@ -139,7 +160,10 @@ AFRAME.registerComponent("philips-hue", {
     this.sphere.setAttribute("color", "red");
     this.sphere.setAttribute("material", "shader: flat; color: red");
     this.sphere.setAttribute("radius", "0.05");
-    this.sphere.setAttribute("visible", "true");
+    this.sphere.setAttribute(
+      "visible",
+      this.system.data.debug ? "true" : "false"
+    );
     this.el.appendChild(this.sphere);
 
     this.el.appendChild(this.light);

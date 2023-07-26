@@ -18,10 +18,14 @@ AFRAME.registerComponent("camera-controls", {
     this.positionOffset = new THREE.Vector3();
     this.euler = new THREE.Euler(0, 0, 0, "YXZ");
     this.quaternion = new THREE.Quaternion();
+    this.anchor = document.getElementById("handAnchor");
 
     // this.el.addEventListener("thumbstickmoved", this.controlCamera.bind(this));
     this.el.addEventListener("abuttondown", this.toggleVisibility.bind(this));
     this.el.addEventListener("bbuttondown", this.createAnchor.bind(this));
+    this.el.addEventListener("triggerdown", this.showAnchor.bind(this));
+    this.el.addEventListener("triggerup", this.hideAnchor.bind(this));
+
     this.showEntities = true;
   },
   controlCamera: function (event) {
@@ -63,5 +67,11 @@ AFRAME.registerComponent("camera-controls", {
       this.el.object3D.position,
       this.el.object3D.quaternion
     );
+  },
+  hideAnchor: function () {
+    this.anchor.object3D.visible = false;
+  },
+  showAnchor: function () {
+    this.anchor.object3D.visible = true;
   },
 });
