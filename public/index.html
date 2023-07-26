@@ -22,6 +22,11 @@
       <a-assets>
         <a-asset-item id="roomModel" src="assets/room.glb"></a-asset-item>
         <a-asset-item id="anchorModel" src="assets/anchor.glb"></a-asset-item>
+        <a-asset-item
+          id="flashlightModel"
+          src="assets/flashlight.glb"
+        ></a-asset-item>
+        <a-asset-item id="torchModel" src="assets/torch.glb"></a-asset-item>
       </a-assets>
 
       <a-entity visible="false" id="anchor">
@@ -49,6 +54,22 @@
         camera-controls="hand: right;"
       >
         <a-box visible="false" color="red" scale="0.01 0.01 0.01"></a-box>
+        <a-entity
+          id="torch"
+          gltf-model="#torchModel"
+          visible="false"
+          scale="5 5 5"
+          rotation="-97.4 0 6"
+          position="0.015 0 0.1"
+        ></a-entity>
+        <a-entity
+          id="flashlight"
+          gltf-model="#flashlightModel"
+          visible="false"
+          position="0.03 0.04 0.15"
+          scale="0.03 0.03 0.03"
+          rotation="-109 0 8.6"
+        ></a-entity>
         <a-entity position="0 -0.2 -0.1" id="handAnchor" visible="false">
           <a-entity
             gltf-model="#anchorModel"
