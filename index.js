@@ -58,7 +58,7 @@ wss.on("connection", (ws) => {
   ws.on("message", (data) => {
     const string = data.toString();
     const message = JSON.parse(string);
-    console.log("ws message received", message);
+    //console.log("ws message received", message);
     const { type } = message;
     switch (type) {
       case "lights":

@@ -25,7 +25,7 @@ AFRAME.registerSystem("philips-hue", {
 
   tick: function (time, timeDelta) {
     if (
-      time > 100 &&
+      time > 0 &&
       window.socket?.readyState == WebSocket.OPEN &&
       window.sendMessage
     ) {
@@ -67,37 +67,45 @@ AFRAME.registerSystem("philips-hue", {
             intensity
           );
 
-          if (!philipsHue.philipsHueColor) {
-            philipsHue.philipsHueColor = newPhilipsHueColor;
-          } else {
-            let colorDifference = 0;
+          let colorDifference = 0;
+
+          if (philipsHue.philipsHueColor) {
             philipsHue.philipsHueColor.forEach((value, index) => {
               colorDifference += Math.abs(value - newPhilipsHueColor[index]);
             });
-            if (colorDifference > this.data.colorDifferenceThreshold) {
+          }
+          if (
+            !philipsHue.philipsHueColor ||
+            colorDifference > this.data.colorDifferenceThreshold
+          ) {
+            if (false)
               console.log(
                 philipsHue.philipsHueColor,
                 newPhilipsHueColor,
                 colorDifference
               );
-              philipsHue.philipsHueColor = newPhilipsHueColor;
-              philipsHue.color.copy(newColor);
-              philipsHue.intensity = intensity;
-              if (this.data.mode != "scene") {
-                philipsHue.updateLight();
-              }
-              console.log("new color", newPhilipsHueColor);
-              lights.push({
-                color: newPhilipsHueColor,
-                bridge: bridgeIndex,
-                light: lightIndex,
-              });
+            philipsHue.philipsHueColor = newPhilipsHueColor;
+            philipsHue.color.copy(newColor);
+            philipsHue.intensity = intensity;
+            if (this.data.mode != "scene") {
+              philipsHue.updateLight();
             }
+            console.log(`new color for "${entity.id}"`, newPhilipsHueColor);
+            lights.push({
+              color: newPhilipsHueColor,
+              bridge: bridgeIndex,
+              light: lightIndex,
+            });
+          }
+
+          if (!philipsHue.philipsHueColor) {
+            philipsHue.philipsHueColor = newPhilipsHueColor;
+          } else {
           }
         }
       });
       if (lights.length > 0) {
-        //window.sendMessage({ type: "lights", lights });
+        window.sendMessage({ type: "lights", lights });
       }
     }
   },
@@ -109,7 +117,7 @@ AFRAME.registerComponent("philips-hue", {
     light: { type: "number" },
   },
   threeLightToPhilipsHueColor: function (color, intensity) {
-    color = color.toArray().map((value) => intensity * Math.floor(value * 255));
+    color = color.toArray().map((value) => Math.round(intensity * value * 255));
     return color;
   },
   init: async function () {
@@ -118,10 +126,7 @@ AFRAME.registerComponent("philips-hue", {
     this._color = new THREE.Color();
     this.previousColor = new THREE.Color();
     this.intensity = 1;
-    this.philipsHueColor = this.threeLightToPhilipsHueColor(
-      this.color,
-      this.intensity
-    );
+    this.philipsHueColor = null;
     this.light = document.createElement("a-light");
     this.light.setAttribute("type", "point");
     this.light.setAttribute(
