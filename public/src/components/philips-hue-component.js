@@ -97,11 +97,6 @@ AFRAME.registerSystem("philips-hue", {
               light: lightIndex,
             });
           }
-
-          if (!philipsHue.philipsHueColor) {
-            philipsHue.philipsHueColor = newPhilipsHueColor;
-          } else {
-          }
         }
       });
       if (lights.length > 0) {
