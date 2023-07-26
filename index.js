@@ -58,15 +58,17 @@ wss.on("connection", (ws) => {
   ws.on("message", (data) => {
     const string = data.toString();
     const message = JSON.parse(string);
-    //console.log("ws message received", message);
+    console.log("ws message received", message);
     const { type } = message;
     switch (type) {
       case "lights":
         const { lights } = message;
         lights.forEach(({ light: lightIndex, bridge: bridgeIndex, color }) => {
           const bridge = bridges[bridgeIndex];
-          //console.log(`setting light #${lightIndex} of bridge #${bridgeIndex} to ${color}...`);
-          bridge.transition(lightIndex, color);
+          if (bridge) {
+            //console.log(`setting light #${lightIndex} of bridge #${bridgeIndex} to ${color}...`);
+            bridge.transition(lightIndex, color);
+          }
         });
         break;
       default:
