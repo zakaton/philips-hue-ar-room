@@ -65,6 +65,9 @@
           rotation="-97.4 0 6"
           position="0.015 0 0.1"
         ></a-entity>
+        <a-entity id="flashlightForward" position="0 0 0">
+          <a-sphere visible="true" color="red" radius="0.01"></a-sphere>
+        </a-entity>
         <a-entity
           id="flashlight"
           gltf-model="#flashlightModel"
@@ -126,9 +129,29 @@
         ></a-entity>
 
         <a-entity
-          philips-hue="bridge: 0; light: 3;"
+          philips-hue="bridge: 1; light: 4;"
           id="kitchenLight1"
           position="-0.868 1.673 0.521"
+        ></a-entity>
+        <a-entity
+          philips-hue="bridge: 1; light: 5;"
+          id="kitchenLight2"
+          position="0.690 1.673 0.511"
+        ></a-entity>
+        <a-entity
+          philips-hue="bridge: 1; light: 3;"
+          id="kitchenLight3"
+          position="1.473 1.673 1.301"
+        ></a-entity>
+        <a-entity
+          philips-hue="bridge: 1; light: 2;"
+          id="kitchenLight4"
+          position="0.638 1.673 1.496"
+        ></a-entity>
+        <a-entity
+          philips-hue="bridge: 1; light: 1;"
+          id="kitchenLight5"
+          position="-0.898 1.673 1.546"
         ></a-entity>
         <a-entity
           philips-hue="bridge: 0; light: 4;"
@@ -141,34 +164,14 @@
           position="-2.195 0.743 6.178"
         ></a-entity>
         <a-entity
-          philips-hue="bridge: 0; light: 6;"
-          id="kitchenLight4"
-          position="0.638 1.673 1.496"
-        ></a-entity>
-        <a-entity
           philips-hue="bridge: 0; light: 7;"
           id="livingRoomFLB"
           position="-2.195 0.743 6.178"
         ></a-entity>
         <a-entity
-          philips-hue="bridge: 0; light: 8;"
-          id="kitchenLight3"
-          position="1.473 1.673 1.301"
-        ></a-entity>
-        <a-entity
-          philips-hue="bridge: 0; light: 9;"
-          id="kitchenLight5"
-          position="-0.898 1.673 1.546"
-        ></a-entity>
-        <a-entity
           philips-hue="bridge: 0; light: 10;"
           id="livingRoomBRB"
           position="1.607 0.778 2.536"
-        ></a-entity>
-        <a-entity
-          philips-hue="bridge: 0; light: 11;"
-          id="kitchenLight2"
-          position="0.690 1.673 0.511"
         ></a-entity>
         <a-entity
           philips-hue="bridge: 0; light: 12;"

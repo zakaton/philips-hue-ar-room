@@ -1,8 +1,8 @@
 AFRAME.registerSystem("philips-hue", {
   schema: {
     mode: {
-      default: "gaze",
-      oneOf: ["scene", "gaze", "torch", "flashlight", "virtual"],
+      default: "flashlight",
+      oneOf: ["scene", "glow", "gaze", "flashlight", "torch", "virtual"],
     },
     colorDifferenceThreshold: { type: "number", default: 0.01 },
     intensityScalar: { type: "number", default: 0.1 },
@@ -11,8 +11,8 @@ AFRAME.registerSystem("philips-hue", {
       default: "[data-virtual-light]",
     },
     debug: { type: "boolean", default: true },
-    distanceThreshold: { type: "vec3", default: [0.1, 10] },
-    angleThreshold: { type: "vec3", default: [0, Math.PI / 4] },
+    distanceThreshold: { type: "vec2", default: [0.1, 5] },
+    angleThreshold: { type: "vec2", default: [0, Math.PI / 4] },
   },
 
   init: function () {
@@ -74,28 +74,48 @@ AFRAME.registerSystem("philips-hue", {
                 1
               );
               break;
-            case "gaze":
-              entity.object3D.getWorldPosition(position);
-              this.cameraForward.object3D.getWorldPosition(
-                cameraForwardPosition
-              );
-              vector.subVectors(position, this.camera.object3D.position);
-              const distance = vector.length();
-              const angle = cameraForwardPosition.angleTo(vector);
-
-              const clampedDistance = this.clampValue(
-                distance,
-                this.data.distanceThreshold
-              );
-              const clampedAngle = this.clampValue(
-                angle,
-                this.data.angleThreshold
-              );
-              intensity = (1 - clampedDistance) * (1 - clampedAngle);
-              if (false && index == 2) {
-                console.log(
-                  `distance: ${clampedDistance}, angle: ${clampedAngle}, intensity: ${intensity}`
+            case "glow":
+              {
+                entity.object3D.getWorldPosition(position);
+                this.cameraForward.object3D.getWorldPosition(
+                  cameraForwardPosition
                 );
+                vector.subVectors(position, this.camera.object3D.position);
+                vector.y = 0;
+                const distance = vector.length();
+                const clampedDistance = this.clampValue(distance, [0.1, 2], 2);
+                intensity = 1 - clampedDistance;
+                if (false && index == 0) {
+                  console.log(
+                    `distance: ${clampedDistance}, intensity: ${intensity}`
+                  );
+                }
+              }
+              break;
+            case "gaze":
+              {
+                entity.object3D.getWorldPosition(position);
+                this.cameraForward.object3D.getWorldPosition(
+                  cameraForwardPosition
+                );
+                vector.subVectors(position, this.camera.object3D.position);
+                const distance = vector.length();
+                const angle = cameraForwardPosition.angleTo(vector);
+
+                const clampedDistance = this.clampValue(
+                  distance,
+                  this.data.distanceThreshold
+                );
+                const clampedAngle = this.clampValue(
+                  angle,
+                  this.data.angleThreshold
+                );
+                intensity = (1 - clampedDistance) * (1 - clampedAngle);
+                if (false && index == 2) {
+                  console.log(
+                    `distance: ${clampedDistance}, angle: ${clampedAngle}, intensity: ${intensity}`
+                  );
+                }
               }
               break;
             case "torch":
@@ -216,6 +236,10 @@ AFRAME.registerComponent("philips-hue", {
 
     this.el.appendChild(this.light);
     this.el.philipsHue = this;
+
+    this.light.addEventListener("loaded", () => {
+      this.updateLight();
+    });
   },
   updateLight: function () {
     const intensity = this.intensity * this.system.data.intensityScalar;
