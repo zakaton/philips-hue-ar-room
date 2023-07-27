@@ -1,11 +1,11 @@
 AFRAME.registerSystem("philips-hue", {
   schema: {
     mode: {
-      default: "glow",
+      default: "torch",
       oneOf: ["scene", "glow", "gaze", "flashlight", "torch", "virtual"],
     },
     colorDifferenceThreshold: { type: "number", default: 0.01 },
-    intensityScalar: { type: "number", default: 0.8 },
+    intensityScalar: { type: "number", default: 0.7 },
     virtualLights: {
       type: "selectorAll",
       default: "[data-virtual-light]",
@@ -15,10 +15,12 @@ AFRAME.registerSystem("philips-hue", {
     angleThreshold: { type: "vec2", default: [0, Math.PI / 4] },
     flashlightDistanceThreshold: { type: "vec2", default: [0.1, 7] },
     flashlightAngleThreshold: { type: "vec2", default: [0, 0.6] },
+    torchDistanceThreshold: { type: "vec2", default: [0.1, 1.1] },
   },
 
   init: function () {
     window.philipsHueSystem = this;
+    this.modes = ["glow", "gaze", "flashlight", "torch"];
     this.entities = [];
     this.tick = AFRAME.utils.throttleTick(this.tick, 1000 / 50, this);
     this.camera = document.getElementById("camera");
@@ -35,16 +37,32 @@ AFRAME.registerSystem("philips-hue", {
       "gripchanged",
       this.onGripChanged.bind(this)
     );
+    this.controllers.left.addEventListener(
+      "ybuttondown",
+      this.cycleMode.bind(this)
+    );
     this.flashlight = document.getElementById("flashlight");
     this.flashlightPosition = new THREE.Vector3();
     this.flashlightForward = document.getElementById("flashlightForward");
     this.torch = document.getElementById("torch");
     this.flashlightIntensity = 0;
 
+    this.torchFlame = document.getElementById("torchFlame");
+    this.torchFlamePosition = new THREE.Vector3();
+
+    this.onModeUpdate();
+  },
+
+  cycleMode: function () {
+    let modeIndex = this.modes.indexOf(this.data.mode);
+    modeIndex += 1;
+    modeIndex %= this.modes.length;
+    this.data.mode = this.modes[modeIndex];
     this.onModeUpdate();
   },
 
   onModeUpdate: function () {
+    console.log(`new mode: "${this.data.mode}"`);
     let shouldShowFlashlight = false;
     let shouldShowTorch = false;
     switch (this.data.mode) {
@@ -93,7 +111,6 @@ AFRAME.registerSystem("philips-hue", {
     ) {
       const lights = [];
       const { position, vector, cameraForwardPosition } = this;
-
       switch (this.data.mode) {
         case "glow":
         case "gaze":
@@ -115,10 +132,15 @@ AFRAME.registerSystem("philips-hue", {
             this.flashlightPosition
           );
           break;
+        case "torch":
+          this.torchFlame.object3D.getWorldPosition(this.torchFlamePosition);
+          break;
       }
 
       this.entities.forEach((entity, index) => {
         const { philipsHue } = entity;
+        entity.object3D.getWorldPosition(position);
+
         if (philipsHue && philipsHue.light.hasLoaded) {
           const { bridge: bridgeIndex, light: lightIndex } = philipsHue.data;
           let { intensity } = philipsHue;
@@ -136,7 +158,6 @@ AFRAME.registerSystem("philips-hue", {
               break;
             case "glow":
               {
-                entity.object3D.getWorldPosition(position);
                 vector.subVectors(position, this.camera.object3D.position);
                 vector.y = 0;
                 const distance = vector.length();
@@ -155,7 +176,6 @@ AFRAME.registerSystem("philips-hue", {
               break;
             case "gaze":
               {
-                entity.object3D.getWorldPosition(position);
                 vector.subVectors(position, this.camera.object3D.position);
                 const distance = vector.length();
                 const angle = cameraForwardPosition.angleTo(vector);
@@ -177,16 +197,32 @@ AFRAME.registerSystem("philips-hue", {
               }
               break;
             case "torch":
-              // FILL
-              // get distance from right controller torch
-              // set color from orange/yellow based on distance
-              // set intensity based on torch distance
-              // add flickering (proportional to distance)
+              {
+                vector.subVectors(position, this.torchFlamePosition);
+                vector.y = 0;
+                const distance = vector.length();
+
+                const clampedDistance = this.clampValue(
+                  distance,
+                  this.data.torchDistanceThreshold,
+                  1
+                );
+                intensity = 1 - clampedDistance;
+                if (intensity > 0) {
+                  intensity += ((Math.random() - 0.5) / 5) * intensity;
+                }
+                newColor.setHSL(0.1, 0.7, 0.7);
+                // FILL - add intensity flicker
+                // FILL - change color based on distance
+                if (false && index == 2) {
+                  console.log(
+                    `distance: ${clampedDistance}, intensity: ${intensity}`
+                  );
+                }
+              }
               break;
             case "flashlight":
               {
-                entity.object3D.getWorldPosition(position);
-
                 vector.subVectors(position, this.flashlightPosition);
                 const distance = vector.length();
                 const angle = this.flashlightForwardPosition.angleTo(vector);
@@ -280,7 +316,11 @@ AFRAME.registerComponent("philips-hue", {
     light: { type: "number" },
   },
   threeLightToPhilipsHueColor: function (color, intensity) {
-    color = color.toArray().map((value) => Math.round(intensity * value * 255));
+    color = color
+      .toArray()
+      .map((value) =>
+        THREE.MathUtils.clamp(Math.round(intensity * value * 255), 0, 255)
+      );
     return color;
   },
   init: async function () {
