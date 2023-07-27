@@ -190,16 +190,19 @@ AFRAME.registerComponent("philips-hue", {
     this.philipsHueColor = null;
     this.light = document.createElement("a-light");
     this.light.setAttribute("type", "point");
-    this.light.setAttribute(
-      "animation__intensity",
-      `property: light.intensity; to: ${
-        this.intensity * this.system.data.intensityScalar
-      }; dur: 20; easing: linear;`
-    );
-    this.light.setAttribute(
-      "animation__color",
-      `property: light.color; to: #${this.color.getHexString()}; dur: 20; easing: linear;`
-    );
+    this.shouldAnimateLight = false;
+    if (this.shouldAnimateLight) {
+      this.light.setAttribute(
+        "animation__intensity",
+        `property: light.intensity; to: ${
+          this.intensity * this.system.data.intensityScalar
+        }; dur: 20; easing: linear;`
+      );
+      this.light.setAttribute(
+        "animation__color",
+        `property: light.color; to: #${this.color.getHexString()}; dur: 20; easing: linear;`
+      );
+    }
 
     this.sphere = document.createElement("a-sphere");
     this.sphere.setAttribute("color", "red");
@@ -215,14 +218,18 @@ AFRAME.registerComponent("philips-hue", {
     this.el.philipsHue = this;
   },
   updateLight: function () {
-    this.light.setAttribute(
-      "animation__intensity",
-      `to: ${this.intensity * this.system.data.intensityScalar};`
-    );
-    this.light.setAttribute(
-      "animation__color",
-      `to: #${this.color.getHexString()};`
-    );
+    const intensity = this.intensity * this.system.data.intensityScalar;
+    if (this.shouldAnimateLight) {
+      this.light.setAttribute("animation__intensity", `to: ${intensity};`);
+      this.light.setAttribute(
+        "animation__color",
+        `to: #${this.color.getHexString()};`
+      );
+    } else {
+      const light = this.light.components.light.light;
+      light.intensity = intensity;
+      light.color.copy(this.color);
+    }
   },
   remove: function () {
     this.system.removeEntity(this);
