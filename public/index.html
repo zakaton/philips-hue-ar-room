@@ -65,9 +65,14 @@
           rotation="-97.4 0 6"
           position="0.015 0 0.1"
         ></a-entity>
-        <a-entity id="flashlightForward" position="0 0 0">
-          <a-sphere visible="true" color="red" radius="0.01"></a-sphere>
+        <a-entity
+          id="flashlightForward"
+          visible="false"
+          position="-0.018 -0.06 -0.14"
+        >
+          <a-sphere color="red" radius="0.01"></a-sphere>
         </a-entity>
+        <a-sphere visible="false" color="red" radius="0.01"></a-sphere>
         <a-entity
           id="flashlight"
           gltf-model="#flashlightModel"

@@ -66,9 +66,9 @@ wss.on("connection", (ws) => {
         lights.forEach(({ light: lightIndex, bridge: bridgeIndex, color }) => {
           const bridge = bridges[bridgeIndex];
           if (bridge) {
-            // console.log(
-            //   `setting light #${lightIndex} of bridge #${bridgeIndex} to ${color}...`
-            // );
+            console.log(
+              `setting light #${lightIndex} of bridge #${bridgeIndex} to ${color}...`
+            );
             bridge.transition(lightIndex, color);
           }
         });
