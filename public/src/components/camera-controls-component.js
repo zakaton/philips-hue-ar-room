@@ -62,16 +62,20 @@ AFRAME.registerComponent("camera-controls", {
     });
   },
   createAnchor: function () {
-    console.log("gonna create anchor");
-    window.persistentAnchorsSystem.createAnchor(
-      this.el.object3D.position,
-      this.el.object3D.quaternion
-    );
+    if (this.isAnchorVisible) {
+      console.log("gonna create anchor");
+      window.persistentAnchorsSystem.createAnchor(
+        this.el.object3D.position,
+        this.el.object3D.quaternion
+      );
+    }
   },
   hideAnchor: function () {
+    this.isAnchorVisible = false;
     this.anchor.object3D.visible = false;
   },
   showAnchor: function () {
+    this.isAnchorVisible = true;
     this.anchor.object3D.visible = true;
   },
 });

@@ -1,7 +1,7 @@
 AFRAME.registerSystem("philips-hue", {
   schema: {
     mode: {
-      default: "scene",
+      default: "gaze",
       oneOf: ["scene", "gaze", "torch", "flashlight", "virtual"],
     },
     colorDifferenceThreshold: { type: "number", default: 0.01 },
@@ -11,6 +11,8 @@ AFRAME.registerSystem("philips-hue", {
       default: "[data-virtual-light]",
     },
     debug: { type: "boolean", default: true },
+    distanceThreshold: { type: "vec3", default: [0.1, 10] },
+    angleThreshold: { type: "vec3", default: [0, Math.PI / 4] },
   },
 
   init: function () {
@@ -18,10 +20,26 @@ AFRAME.registerSystem("philips-hue", {
     this.entities = [];
     this.tick = AFRAME.utils.throttleTick(this.tick, 1000 / 50, this);
     this.camera = document.getElementById("camera");
+    this.cameraForward = document.getElementById("cameraForward");
+    this.vector = new THREE.Vector3();
+    this.cameraForwardPosition = new THREE.Vector3();
+    this.position = new THREE.Vector3();
     this.controllers = {
       left: document.getElementById("leftHandControls"),
       right: document.getElementById("rightHandControls"),
     };
+    this.controllers.right.addEventListener(
+      "gripchanged",
+      this.onGripChanged.bind(this)
+    );
+  },
+
+  onGripChanged: function (event) {
+    if (this.data.mode == "flashlight") {
+      // FILL - set flashlight intensity to "value"
+      const { value } = event.detail;
+      console.log(value);
+    }
   },
 
   addEntity: function (entity) {
@@ -38,7 +56,8 @@ AFRAME.registerSystem("philips-hue", {
       window.sendMessage
     ) {
       const lights = [];
-      this.entities.forEach((entity) => {
+      const { position, vector, cameraForwardPosition } = this;
+      this.entities.forEach((entity, index) => {
         const { philipsHue } = entity;
         if (philipsHue && philipsHue.light.hasLoaded) {
           const { bridge: bridgeIndex, light: lightIndex } = philipsHue.data;
@@ -56,10 +75,28 @@ AFRAME.registerSystem("philips-hue", {
               );
               break;
             case "gaze":
-              // FILL
-              // get ray from camera
-              // get distance/offset of entity from ray
-              // set intensity to be high as distance/offset is low, interpolated by min/max threshold
+              entity.object3D.getWorldPosition(position);
+              this.cameraForward.object3D.getWorldPosition(
+                cameraForwardPosition
+              );
+              vector.subVectors(position, this.camera.object3D.position);
+              const distance = vector.length();
+              const angle = cameraForwardPosition.angleTo(vector);
+
+              const clampedDistance = this.clampValue(
+                distance,
+                this.data.distanceThreshold
+              );
+              const clampedAngle = this.clampValue(
+                angle,
+                this.data.angleThreshold
+              );
+              intensity = (1 - clampedDistance) * (1 - clampedAngle);
+              if (false && index == 2) {
+                console.log(
+                  `distance: ${clampedDistance}, angle: ${clampedAngle}, intensity: ${intensity}`
+                );
+              }
               break;
             case "torch":
               // FILL
@@ -121,9 +158,17 @@ AFRAME.registerSystem("philips-hue", {
         }
       });
       if (lights.length > 0) {
-        window.sendMessage({ type: "lights", lights });
+        //window.sendMessage({ type: "lights", lights });
       }
     }
+  },
+
+  clampValue: function (value, threshold, exp = 3) {
+    const [min, max] = threshold;
+    value = THREE.MathUtils.clamp(value, min, max);
+    value -= min;
+    value /= max - min;
+    return value ** exp;
   },
 });
 
