@@ -10,12 +10,13 @@ AFRAME.registerSystem("philips-hue", {
       type: "selectorAll",
       default: "[data-virtual-light]",
     },
-    debug: { type: "boolean", default: true },
+    debug: { type: "boolean", default: false },
     distanceThreshold: { type: "vec2", default: [0.1, 5] },
     angleThreshold: { type: "vec2", default: [0, Math.PI / 4] },
     flashlightDistanceThreshold: { type: "vec2", default: [0.1, 7] },
     flashlightAngleThreshold: { type: "vec2", default: [0, 0.6] },
     torchDistanceThreshold: { type: "vec2", default: [0.1, 1.1] },
+    torchHueRange: { type: "vec2", default: [0.08, 0.15] },
   },
 
   init: function () {
@@ -166,6 +167,7 @@ AFRAME.registerSystem("philips-hue", {
                   [0.1, 1.5],
                   2
                 );
+                newColor.setHSL(0, 0, 1);
                 intensity = 1 - clampedDistance;
                 if (false && index == 0) {
                   console.log(
@@ -188,6 +190,7 @@ AFRAME.registerSystem("philips-hue", {
                   angle,
                   this.data.angleThreshold
                 );
+                newColor.setHSL(0, 0, 1);
                 intensity = (1 - clampedDistance) * (1 - clampedAngle);
                 if (false && index == 2) {
                   console.log(
@@ -211,7 +214,11 @@ AFRAME.registerSystem("philips-hue", {
                 if (intensity > 0) {
                   intensity += ((Math.random() - 0.5) / 5) * intensity;
                 }
-                newColor.setHSL(0.1, 0.7, 0.7);
+                newColor.setHSL(
+                  THREE.MathUtils.lerp(...this.data.torchHueRange, intensity),
+                  0.7,
+                  0.7
+                );
                 // FILL - add intensity flicker
                 // FILL - change color based on distance
                 if (false && index == 2) {
@@ -236,6 +243,7 @@ AFRAME.registerSystem("philips-hue", {
                   this.data.flashlightAngleThreshold,
                   3
                 );
+                newColor.setHSL(0, 0, 1);
                 intensity =
                   this.flashlightIntensity *
                   (1 - clampedDistance) *
