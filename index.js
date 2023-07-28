@@ -30,7 +30,7 @@ async function setupBridges() {
     console.log(`set up bridge #${index}`);
   });
 }
-setupBridges();
+//setupBridges();
 
 var options = {
   key: fs.readFileSync("./sec/key.pem"),

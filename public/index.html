@@ -9,6 +9,7 @@
     <script src="src/components/detected-planes-component.js"></script>
     <!-- https://github.com/gftruj/aframe-hand-tracking-controls-extras -->
     <script src="src/components/hand-tracking-controls-extras.js"></script>
+    <script src="src/components/shadow-component.js"></script>
   </head>
   <body>
     <a-scene
@@ -28,6 +29,7 @@
         ></a-asset-item>
         <a-asset-item id="torchModel" src="assets/torch.glb"></a-asset-item>
         <a-asset-item id="violinModel" src="assets/violin.glb"></a-asset-item>
+        <a-asset-item id="chairModel" src="assets/chair.glb"></a-asset-item>
       </a-assets>
 
       <a-entity visible="false" id="anchor">
@@ -103,7 +105,16 @@
           id="violin"
           gltf-model="#violinModel"
           rotation="0 -90.000 0"
-          position="0 -0.060 2.149"
+          position="0.105 -0.005 1.756"
+          scale="1.5 1.5 1.5"
+          shadow="cast: true;"
+        ></a-entity>
+        <a-entity
+          id="chair"
+          gltf-model="#chairModel"
+          rotation="0 39.104 0"
+          position="-1.166 -0.515 -0.071"
+          shadow="cast: true;"
         ></a-entity>
 
         <a-entity id="internalAnchor" position="0 0 0">
@@ -120,7 +131,7 @@
         <a-entity
           data-toggle-visibility
           data-color-write="false"
-          gltf-model="#roomModel"
+          _gltf-model="#roomModel"
           position="0 0 0"
           scale="1 1 1"
           shadow="receive: true; cast: false;"

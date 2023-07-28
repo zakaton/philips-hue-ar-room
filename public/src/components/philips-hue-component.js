@@ -1,11 +1,11 @@
 AFRAME.registerSystem("philips-hue", {
   schema: {
     mode: {
-      default: "torch",
+      default: "scene",
       oneOf: ["scene", "glow", "gaze", "flashlight", "torch", "virtual"],
     },
     colorDifferenceThreshold: { type: "number", default: 0.01 },
-    intensityScalar: { type: "number", default: 0.7 },
+    intensityScalar: { type: "number", default: 0.2 }, // 0.7
     virtualLights: {
       type: "selectorAll",
       default: "[data-virtual-light]",
@@ -304,7 +304,7 @@ AFRAME.registerSystem("philips-hue", {
         }
       });
       if (lights.length > 0) {
-        window.sendMessage({ type: "lights", lights });
+        //window.sendMessage({ type: "lights", lights });
       }
     }
   },
