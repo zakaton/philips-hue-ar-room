@@ -1,11 +1,11 @@
 AFRAME.registerSystem("philips-hue", {
   schema: {
     mode: {
-      default: "scene",
+      default: "glow",
       oneOf: ["scene", "glow", "gaze", "flashlight", "torch", "virtual"],
     },
     colorDifferenceThreshold: { type: "number", default: 0.01 },
-    intensityScalar: { type: "number", default: 0.2 }, // 0.7
+    intensityScalar: { type: "number", default: 0.7 }, // 0.7
     virtualLights: {
       type: "selectorAll",
       default: "[data-virtual-light]",
@@ -17,6 +17,7 @@ AFRAME.registerSystem("philips-hue", {
     flashlightAngleThreshold: { type: "vec2", default: [0, 0.6] },
     torchDistanceThreshold: { type: "vec2", default: [0.1, 1.1] },
     torchHueRange: { type: "vec2", default: [0.08, 0.15] },
+    gazeDistanceThreshold: { type: "vec2", default: [0.1, 8] },
   },
 
   init: function () {
@@ -184,7 +185,7 @@ AFRAME.registerSystem("philips-hue", {
 
                 const clampedDistance = this.clampValue(
                   distance,
-                  this.data.distanceThreshold
+                  this.data.gazeDistanceThreshold
                 );
                 const clampedAngle = this.clampValue(
                   angle,
@@ -304,7 +305,7 @@ AFRAME.registerSystem("philips-hue", {
         }
       });
       if (lights.length > 0) {
-        //window.sendMessage({ type: "lights", lights });
+        window.sendMessage({ type: "lights", lights });
       }
     }
   },
