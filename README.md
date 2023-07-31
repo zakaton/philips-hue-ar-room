@@ -20,6 +20,8 @@ const light = this.lights.find(({id}) => id == lightId)
 
 turn firewall off
 
+add "room.glb" to /public/assets
+
 install https://code.visualstudio.com/ & https://nodejs.org/en/
 install npm in terminal: sudo npm install
 install yarn in VS Code terminal: yarn install
