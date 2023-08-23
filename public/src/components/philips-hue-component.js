@@ -53,7 +53,37 @@ AFRAME.registerSystem("philips-hue", {
     this.torchFlamePosition = new THREE.Vector3();
 
     this.onModeUpdate();
+    this.setupSocketConnection();
   },
+
+  setupSocketConnection: function () {
+    let socket;
+
+    const createSocket = () => {
+      socket = window.socket = io();
+
+      socket.on("connect", () => {
+        console.log("connection opened");
+        this.onSocketConnection();
+      });
+      socket.on("disconnect", () => {
+        console.log("connection closed");
+        this.onSocketDisconnection();
+      });
+    };
+    createSocket();
+
+    const send = (type, ...args) => {
+      if (socket.connected) {
+        socket.emit(type, ...args);
+      }
+    };
+
+    this.sendSocketMessage = send;
+  },
+
+  onSocketConnection: function () {},
+  onSocketDisconnection: function () {},
 
   cycleMode: function () {
     let modeIndex = this.modes.indexOf(this.data.mode);
@@ -372,6 +402,7 @@ AFRAME.registerComponent("philips-hue", {
       this.updateLight();
     });
   },
+
   updateLight: function () {
     const intensity = this.intensity * this.system.data.intensityScalar;
     if (this.shouldAnimateLight) {

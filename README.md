@@ -7,8 +7,6 @@ Windows is the same but without `sudo`, if you have openssl installed
 
 put the \*.pem files in the /sec/ folder
 
-also create a file `philips-hue-credentials.js` based on `_philips-hue-credentials.js` with your philips hue credentials
-
 also comment out lines 32 and 44 of hue-bridge.js under /node_modules/phea/build/hue-bridge.js for group id's outside the range
 
 also rewrite line 58 of phea-engine.js to:
