@@ -11,9 +11,10 @@ process.on("SIGINT", () => {
   // Stop example with ctrl+c
   console.log("SIGINT Detected. Shutting down...");
   bridges.forEach((bridge, index) => {
-    if (bridge.bridge) {
+    const _bridge = _bridges[bridge.id];
+    if (_bridge) {
       console.log(`stopping bridge #${index}...`);
-      bridge.bridge.stop();
+      _bridge.stop();
       console.log(`stopped bridge #${index}`);
     }
   });
@@ -48,6 +49,7 @@ async function savePhilipsHueBridgesInformation() {
 }
 
 const bridges = [];
+const _bridges = {};
 
 function discoverBridges() {
   const browser = mdns.createBrowser(mdns.tcp("hue"));
@@ -80,7 +82,23 @@ function onDiscoverdBridge(discoveredBridge) {
     credentials,
   };
   bridges.push(bridge);
+  if (bridge.credentials) {
+    onBridgeCredentials(bridge);
+  }
   io.emit("bridges", bridges);
+}
+
+async function onBridgeCredentials(bridge) {
+  try {
+    const _bridge = await Phea.bridge({
+      ...bridge.credentials,
+      address: bridge.ip,
+    });
+    console.log("got bridge", _bridge);
+    _bridges[bridge.id] = _bridge;
+  } catch (error) {
+    console.log("failed getting bridge", error);
+  }
 }
 
 async function setupBridges() {
@@ -137,6 +155,7 @@ io.on("connection", (socket) => {
         if (credentials) {
           console.log("successfully got credentials", credentials);
           bridge.credentials = credentials;
+          onBridgeCredentials(bridge);
           philipsHueBridgesInformation[bridge.id].credentials = credentials;
           savePhilipsHueBridgesInformation();
         }
