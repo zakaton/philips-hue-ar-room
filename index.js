@@ -16,8 +16,58 @@ process.on("SIGINT", () => {
   });
 });
 
+let philipsHueCredentials;
+async function getPhilipsHueCredentials() {
+  try {
+    const data = await fs.promises.readFile(
+      "philips-hue-credentials.json",
+      "utf8"
+    );
+    philipsHueCredentials = JSON.parse(data);
+    console.log("philipsHueCredentials", philipsHueCredentials);
+  } catch (error) {
+    console.error("Error reading credentials:", error);
+    // throw error;
+  }
+}
+async function savePhilipsHueCredentials() {
+  try {
+    await fs.promises.writeFile(
+      "philips-hue-credentials.json",
+      JSON.stringify(philipsHueCredentials, null, 2),
+      "utf8"
+    );
+    console.log("Credentials saved successfully.");
+  } catch (error) {
+    console.error("Error saving credentials:", error);
+    // throw error;
+  }
+}
+
 const bridges = [];
-async function setupBridges() {}
+async function setupBridges() {
+  await getPhilipsHueCredentials();
+  if (!philipsHueCredentials) {
+    console.log("no credentials");
+    philipsHueCredentials = {};
+    await savePhilipsHueCredentials();
+  }
+
+  let discoveredBridges = await Phea.discover();
+  console.log("discoveredBridges", discoveredBridges);
+  discoveredBridges.forEach((discoveredBridge) => {
+    const { name, id, ip, mac } = discoveredBridge;
+    const credentials = bridgesContainer[id];
+    const bridge = {
+      name,
+      id,
+      ip,
+      mac,
+      credentials,
+    };
+    bridges.push(bridge);
+  });
+}
 setupBridges();
 
 var options = {
@@ -47,6 +97,8 @@ const io = new Server(httpsServer, {
 });
 io.on("connection", (socket) => {
   console.log("new client");
+
+  socket.emit("bridges", bridges);
 
   socket.on("lights", (message) => {
     const { lights } = message;

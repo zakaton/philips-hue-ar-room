@@ -103,10 +103,8 @@ dist
 # TernJS port file
 .tern-port
 
-certificate
 .vscode
 .DS_Store
 *.txt
-room.glb
-philips-hue-credentials.js
+philips-hue-credentials.json
 sec

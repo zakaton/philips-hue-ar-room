@@ -1,0 +1,69 @@
+<html>
+  <head>
+    <title>Philips Hue AR (Desktop)</title>
+    <script src="/src/socket.io.min.js"></script>
+  </head>
+  <body>
+    <h1>Philips Hue AR (Desktop)</h1>
+
+    <p id="socketConnection"></p>
+
+    <div id="bridges">
+      <template id="bridgeTemplate">
+        <ol class="bridge">
+          <li>
+            name: <b class="name"></b>
+            <ul>
+              <li>id: <b class="id"></b></li>
+              <li>ip: <b class="ip"></b></li>
+              <li>mac: <b class="mac"></b></li>
+              <li>credentials: <b class="credentials"></b></li>
+              <button class="getCredentials" hidden>get credentials</button>
+            </ul>
+          </li>
+        </ol>
+      </template>
+    </div>
+  </body>
+  <script>
+    const socket = io();
+    socket.on("connect", () => {
+      console.log("connection opened");
+      socketConnectionContainer.innerText = "connected to server";
+    });
+    socket.on("disconnect", () => {
+      console.log("connection closed");
+      socketConnectionContainer.innerText = "disconnected from server";
+    });
+
+    const socketConnectionContainer =
+      document.getElementById("socketConnection");
+
+    const bridgeTemplate = document.getElementById("bridgeTemplate");
+    const bridgesContainer = document.getElementById("bridges");
+
+    let bridges = [];
+    socket.on("bridges", (_bridges) => {
+      bridges = _bridges;
+      bridgesContainer.innerHTML = "";
+      bridges.forEach((bridge) => {
+        const bridgeContainer = bridgeTemplate.content
+          .cloneNode(true)
+          .querySelector(".bridge");
+
+        for (const key in bridge) {
+          bridgeContainer.querySelector(`.${key}`).innerText = bridge[key];
+        }
+        if (!bridge.credentials) {
+          const getCredentialsButton =
+            bridgeContainer.querySelector(".getCredentials");
+          getCredentialsButton.removeAttribute("hidden");
+          getCredentialsButton.addEventListener("click", () => {
+            // FILL
+          });
+        }
+        bridgesContainer.appendChild(bridgeContainer);
+      });
+    });
+  </script>
+</html>
