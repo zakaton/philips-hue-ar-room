@@ -49,10 +49,6 @@ async function savePhilipsHueCredentials() {
 
 const bridges = [];
 
-const sequence = [
-  mdns.rst.DNSServiceResolve(),
-  mdns.rst.getaddrinfo({ families: [4] }),
-];
 function discoverBridges() {
   const browser = mdns.createBrowser(mdns.tcp("hue"));
   browser.on("serviceUp", (service) => {
@@ -81,7 +77,7 @@ function onDiscoverdBridge(discoveredBridge) {
     credentials,
   };
   bridges.push(bridge);
-  sockets.forEach((socket) => socket.emit("bridges", bridges));
+  io.emit("bridges", bridges);
 }
 
 async function setupBridges() {
@@ -122,14 +118,34 @@ const io = new Server(httpsServer, {
     origin: "*",
   },
 });
-const sockets = new Set();
 io.on("connection", (socket) => {
   console.log("new client");
-  sockets.add(socket);
 
   socket.emit("bridges", bridges);
 
   socket.on("discoverBridges", () => setupBridges());
+
+  socket.on("getCredentials", async (ip, response) => {
+    const bridge = bridges.find((bridge) => bridge.ip == ip);
+    let credentials;
+    if (bridge) {
+      try {
+        credentials = await Phea.register(ip);
+        if (credentials) {
+          console.log("successfully got credentials", credentials);
+          bridge.credentials = credentials;
+          philipsHueCredentials[bridge.id] = credentials;
+          savePhilipsHueCredentials();
+        }
+      } catch (error) {
+        if (error instanceof Promise) {
+          error = await error;
+        }
+        console.log("error getting credentials", error);
+      }
+    }
+    response(credentials);
+  });
 
   socket.on("lights", (message) => {
     const { lights } = message;
@@ -145,6 +161,5 @@ io.on("connection", (socket) => {
   });
   socket.on("disconnect", () => {
     console.log("client left");
-    sockets.delete(socket);
   });
 });

@@ -19,7 +19,9 @@
               <li>id: <b class="id"></b></li>
               <li>ip: <b class="ip"></b></li>
               <li>credentials: <b class="credentials"></b></li>
-              <button class="getCredentials" hidden>get credentials</button>
+              <button class="getCredentials" hidden>
+                get credentials (press bridge button first)
+              </button>
             </ul>
           </li>
         </ol>
@@ -56,16 +58,29 @@
         const bridgeContainer = bridgeTemplate.content
           .cloneNode(true)
           .querySelector(".bridge");
-        console.log(bridge);
         for (const key in bridge) {
-          bridgeContainer.querySelector(`.${key}`).innerText = bridge[key];
+          let value = bridge[key];
+          if (typeof value == "object") {
+            value = JSON.stringify(value);
+          }
+          bridgeContainer.querySelector(`.${key}`).innerText = value;
         }
         if (!bridge.credentials) {
+          const credentialsContainer =
+            bridgeContainer.querySelector(`.credentials`);
+          credentialsContainer.parentElement.setAttribute("hidden", "");
           const getCredentialsButton =
             bridgeContainer.querySelector(".getCredentials");
           getCredentialsButton.removeAttribute("hidden");
           getCredentialsButton.addEventListener("click", () => {
-            // FILL
+            socket.emit("getCredentials", bridge.ip, (credentials) => {
+              bridge.credentials = credentials;
+              if (credentials) {
+                credentialsContainer.parentElement.removeAttribute("hidden");
+                credentialsContainer.innerText = JSON.stringify(credentials);
+                getCredentialsButton.setAttribute("hidden", "");
+              }
+            });
           });
         }
         bridgesContainer.appendChild(bridgeContainer);
