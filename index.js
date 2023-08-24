@@ -19,30 +19,30 @@ process.on("SIGINT", () => {
   });
 });
 
-let philipsHueCredentials;
-async function getPhilipsHueCredentials() {
+let philipsHueBridgesInformation;
+async function getPhilipsHueBridgesInformation() {
   try {
     const data = await fs.promises.readFile(
-      "philips-hue-credentials.json",
+      "philips-hue-bridges-information.json",
       "utf8"
     );
-    philipsHueCredentials = JSON.parse(data);
-    console.log("philipsHueCredentials", philipsHueCredentials);
+    philipsHueBridgesInformation = JSON.parse(data);
+    console.log("philipsHueBridgesInformation", philipsHueBridgesInformation);
   } catch (error) {
-    console.error("Error reading credentials:", error);
+    console.error("Error getting philips hue bridges information:", error);
     // throw error;
   }
 }
-async function savePhilipsHueCredentials() {
+async function savePhilipsHueBridgesInformation() {
   try {
     await fs.promises.writeFile(
-      "philips-hue-credentials.json",
-      JSON.stringify(philipsHueCredentials, null, 2),
+      "philips-hue-bridges-information.json",
+      JSON.stringify(philipsHueBridgesInformation, null, 2),
       "utf8"
     );
-    console.log("Credentials saved successfully.");
+    console.log("bridge information saved successfully.");
   } catch (error) {
-    console.error("Error saving credentials:", error);
+    console.error("Error saving bridge information:", error);
     // throw error;
   }
 }
@@ -69,7 +69,10 @@ function discoverBridges() {
 
 function onDiscoverdBridge(discoveredBridge) {
   const { name, id, ip } = discoveredBridge;
-  const credentials = philipsHueCredentials[id];
+  if (!philipsHueBridgesInformation[id]) {
+    philipsHueBridgesInformation[id] = {};
+  }
+  const { credentials } = philipsHueBridgesInformation[id];
   const bridge = {
     name,
     id,
@@ -82,11 +85,11 @@ function onDiscoverdBridge(discoveredBridge) {
 
 async function setupBridges() {
   bridges.length = 0;
-  await getPhilipsHueCredentials();
-  if (!philipsHueCredentials) {
-    console.log("no credentials");
-    philipsHueCredentials = {};
-    await savePhilipsHueCredentials();
+  await getPhilipsHueBridgesInformation();
+  if (!philipsHueBridgesInformation) {
+    console.log("no philips hue bridges information");
+    philipsHueBridgesInformation = {};
+    await savePhilipsHueBridgesInformation();
   }
 
   discoverBridges();
@@ -134,8 +137,8 @@ io.on("connection", (socket) => {
         if (credentials) {
           console.log("successfully got credentials", credentials);
           bridge.credentials = credentials;
-          philipsHueCredentials[bridge.id] = credentials;
-          savePhilipsHueCredentials();
+          philipsHueBridgesInformation[bridge.id].credentials = credentials;
+          savePhilipsHueBridgesInformation();
         }
       } catch (error) {
         if (error instanceof Promise) {
