@@ -106,5 +106,5 @@ dist
 .vscode
 .DS_Store
 *.txt
-philips-hue-credentials.json
+philips-hue-bridges-information.json
 sec
