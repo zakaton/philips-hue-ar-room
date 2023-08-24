@@ -5,14 +5,17 @@ var app = express();
 const { Server } = require("socket.io");
 var fs = require("fs");
 const Phea = require("phea");
+const mdns = require("mdns");
 
 process.on("SIGINT", () => {
   // Stop example with ctrl+c
   console.log("SIGINT Detected. Shutting down...");
   bridges.forEach((bridge, index) => {
-    console.log(`stopping bridge #${index}...`);
-    bridge.stop();
-    console.log(`stopped bridge #${index}`);
+    if (bridge.bridge) {
+      console.log(`stopping bridge #${index}...`);
+      bridge.bridge.stop();
+      console.log(`stopped bridge #${index}`);
+    }
   });
 });
 
@@ -45,7 +48,44 @@ async function savePhilipsHueCredentials() {
 }
 
 const bridges = [];
+
+const sequence = [
+  mdns.rst.DNSServiceResolve(),
+  mdns.rst.getaddrinfo({ families: [4] }),
+];
+function discoverBridges() {
+  const browser = mdns.createBrowser(mdns.tcp("hue"));
+  browser.on("serviceUp", (service) => {
+    //console.log("Found a Philips Hue bridge:", service);
+    const { name, txtRecord } = service;
+    const { bridgeid, modelid } = txtRecord;
+    const ip = service.addresses[service.addresses.length - 1];
+    const discoveredBridge = { name, id: bridgeid, ip };
+    onDiscoverdBridge(discoveredBridge);
+  });
+
+  browser.on("error", (error) => {
+    console.error("Error while discovering Philips Hue bridges:", error);
+  });
+
+  browser.start();
+}
+
+function onDiscoverdBridge(discoveredBridge) {
+  const { name, id, ip } = discoveredBridge;
+  const credentials = philipsHueCredentials[id];
+  const bridge = {
+    name,
+    id,
+    ip,
+    credentials,
+  };
+  bridges.push(bridge);
+  sockets.forEach((socket) => socket.emit("bridges", bridges));
+}
+
 async function setupBridges() {
+  bridges.length = 0;
   await getPhilipsHueCredentials();
   if (!philipsHueCredentials) {
     console.log("no credentials");
@@ -53,20 +93,7 @@ async function setupBridges() {
     await savePhilipsHueCredentials();
   }
 
-  let discoveredBridges = await Phea.discover();
-  console.log("discoveredBridges", discoveredBridges);
-  discoveredBridges.forEach((discoveredBridge) => {
-    const { name, id, ip, mac } = discoveredBridge;
-    const credentials = bridgesContainer[id];
-    const bridge = {
-      name,
-      id,
-      ip,
-      mac,
-      credentials,
-    };
-    bridges.push(bridge);
-  });
+  discoverBridges();
 }
 setupBridges();
 
@@ -95,10 +122,14 @@ const io = new Server(httpsServer, {
     origin: "*",
   },
 });
+const sockets = new Set();
 io.on("connection", (socket) => {
   console.log("new client");
+  sockets.add(socket);
 
   socket.emit("bridges", bridges);
+
+  socket.on("discoverBridges", () => setupBridges());
 
   socket.on("lights", (message) => {
     const { lights } = message;
@@ -114,5 +145,6 @@ io.on("connection", (socket) => {
   });
   socket.on("disconnect", () => {
     console.log("client left");
+    sockets.delete(socket);
   });
 });
