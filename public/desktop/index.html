@@ -22,6 +22,7 @@
               <button class="getCredentials" hidden>
                 get credentials (press bridge button first)
               </button>
+              <li>group: <b class="group"></b></li>
             </ul>
           </li>
         </ol>
@@ -63,7 +64,10 @@
           if (typeof value == "object") {
             value = JSON.stringify(value);
           }
-          bridgeContainer.querySelector(`.${key}`).innerText = value;
+          const container = bridgeContainer.querySelector(`.${key}`);
+          if (container) {
+            container.innerText = value;
+          }
         }
         if (!bridge.credentials) {
           const credentialsContainer =

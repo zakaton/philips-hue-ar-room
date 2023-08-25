@@ -74,7 +74,7 @@ function onDiscoverdBridge(discoveredBridge) {
   if (!philipsHueBridgesInformation[id]) {
     philipsHueBridgesInformation[id] = {};
   }
-  const { credentials } = philipsHueBridgesInformation[id];
+  const { credentials, group } = philipsHueBridgesInformation[id];
   let bridge = bridges.find((bridge) => bridge.id == id);
   if (bridge) {
     return;
@@ -84,6 +84,7 @@ function onDiscoverdBridge(discoveredBridge) {
     id,
     ip,
     credentials,
+    group,
   };
   bridges.push(bridge);
   if (bridge.credentials) {
@@ -107,9 +108,32 @@ async function onBridgeCredentials(bridge) {
 }
 
 async function onBridgeConnection(bridge) {
-  const _bridge = _bridges[bridge.id];
-  const groups = await _bridge.getGroup(0); // 0 will fetch all groups.
-  console.log("groups", groups);
+  await getBridgeGroup(bridge);
+}
+
+async function getBridgeGroup(bridge, overwrite = false) {
+  if (!bridge.group || overwrite) {
+    const _bridge = _bridges[bridge.id];
+    const bridgeInformation = philipsHueBridgesInformation[bridge.id];
+    console.log(`getting groups for bridge ${bridge.id}...`);
+    const groups = await _bridge.getGroup(0); // 0 will fetch all groups.
+    console.log("got groups", groups);
+    for (const groupId in groups) {
+      const group = groups[groupId];
+      if (group.type == "Entertainment") {
+        console.log("found Entertainment group", group);
+        const groupInformation = {
+          id: groupId,
+          lights: group.lights.map((lightId) => {
+            return { id: lightId, position: [0, 0, 0] };
+          }),
+        };
+        bridgeInformation.group = bridge.group = groupInformation;
+        await savePhilipsHueBridgesInformation();
+        break;
+      }
+    }
+  }
 }
 
 async function setupBridges() {
