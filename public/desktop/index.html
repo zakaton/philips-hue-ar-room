@@ -23,6 +23,7 @@
                 get credentials (press bridge button first)
               </button>
               <li>group: <b class="group"></b></li>
+              <button class="getGroup" hidden>refresh group</button>
             </ul>
           </li>
         </ol>
@@ -83,6 +84,20 @@
                 credentialsContainer.parentElement.removeAttribute("hidden");
                 credentialsContainer.innerText = JSON.stringify(credentials);
                 getCredentialsButton.setAttribute("hidden", "");
+              }
+            });
+          });
+        }
+        if (bridge.group) {
+          const groupContainer = document.querySelector(".group");
+          const getGroupButton = bridgeContainer.querySelector(".getGroup");
+          getGroupButton.removeAttribute("hidden");
+          getGroupButton.addEventListener("click", () => {
+            socket.emit("getGroup", bridge.ip, (group) => {
+              bridge.group = group;
+              if (group) {
+                groupContainer.parentElement.removeAttribute("hidden");
+                groupContainer.innerText = JSON.stringify(credentials);
               }
             });
           });

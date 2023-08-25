@@ -203,6 +203,14 @@ io.on("connection", (socket) => {
     }
     response(credentials);
   });
+  socket.on("getGroup", async (ip, response) => {
+    const bridge = bridges.find((bridge) => bridge.ip == ip);
+    let group;
+    if (bridge) {
+      await getBridgeGroup(bridge, true);
+    }
+    response(group);
+  });
 
   socket.on("lights", (message) => {
     const { lights } = message;
