@@ -25,8 +25,12 @@
               <li>group: <b class="group"></b></li>
               <button class="getGroup" hidden>refresh group</button>
             </ul>
+            <ul class="lights"></ul>
           </li>
         </ol>
+      </template>
+      <template id="lightTemplate">
+        <li class="light">light #<span></span>: <input type="color" /></li>
       </template>
     </div>
   </body>
@@ -51,6 +55,8 @@
 
     const bridgeTemplate = document.getElementById("bridgeTemplate");
     const bridgesContainer = document.getElementById("bridges");
+
+    const lightTemplate = document.getElementById("lightTemplate");
 
     let bridges = [];
     socket.on("bridges", (_bridges) => {
@@ -88,8 +94,29 @@
             });
           });
         }
+
+        const lightsContainer = bridgeContainer.querySelector(".lights");
+        const onGroupUpdate = () => {
+          lightsContainer.innerHTML = "";
+          bridge.group.lights.forEach((light) => {
+            const lightContainer = lightTemplate.content
+              .cloneNode(true)
+              .querySelector(".light");
+            lightContainer.querySelector("span").innerText = light.id;
+            lightContainer
+              .querySelector("input")
+              .addEventListener("input", (event) => {
+                const value = event.target.value;
+                console.log(light.id, value);
+              });
+            lightsContainer.appendChild(lightContainer);
+          });
+        };
+
         if (bridge.group) {
-          const groupContainer = document.querySelector(".group");
+          onGroupUpdate();
+
+          const groupContainer = bridgeContainer.querySelector(".group");
           const getGroupButton = bridgeContainer.querySelector(".getGroup");
           getGroupButton.removeAttribute("hidden");
           getGroupButton.addEventListener("click", () => {
@@ -98,6 +125,7 @@
               if (group) {
                 groupContainer.parentElement.removeAttribute("hidden");
                 groupContainer.innerText = JSON.stringify(credentials);
+                onGroupUpdate();
               }
             });
           });

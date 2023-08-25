@@ -6,6 +6,7 @@ const { Server } = require("socket.io");
 var fs = require("fs");
 const Phea = require("phea");
 const mdns = require("mdns");
+const _ = require("lodash");
 
 process.on("SIGINT", () => {
   // Stop example with ctrl+c
@@ -34,7 +35,7 @@ async function getPhilipsHueBridgesInformation() {
     // throw error;
   }
 }
-async function savePhilipsHueBridgesInformation() {
+async function _savePhilipsHueBridgesInformation() {
   try {
     await fs.promises.writeFile(
       "philips-hue-bridges-information.json",
@@ -47,6 +48,9 @@ async function savePhilipsHueBridgesInformation() {
     // throw error;
   }
 }
+const savePhilipsHueBridgesInformation = _.debounce(async function () {
+  await _savePhilipsHueBridgesInformation();
+}, 500);
 
 const bridges = [];
 const _bridges = {};
@@ -210,6 +214,18 @@ io.on("connection", (socket) => {
       await getBridgeGroup(bridge, true);
     }
     response(group);
+  });
+
+  socket.on("setLights", (message) => {
+    const { lights } = message;
+
+    let didUpdatePosition = false;
+    lights.forEach(({ bridgeId, lightId, color, position }) => {
+      // FILL
+    });
+    if (didUpdatePosition) {
+      savePhilipsHueBridgesInformation();
+    }
   });
 
   socket.on("lights", (message) => {
