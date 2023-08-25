@@ -54,7 +54,7 @@ const _bridges = {};
 function discoverBridges() {
   const browser = mdns.createBrowser(mdns.tcp("hue"));
   browser.on("serviceUp", (service) => {
-    //console.log("Found a Philips Hue bridge:", service);
+    console.log("Found a Philips Hue bridge:", service);
     const { name, txtRecord } = service;
     const { bridgeid, modelid } = txtRecord;
     const ip = service.addresses[service.addresses.length - 1];
@@ -75,7 +75,11 @@ function onDiscoverdBridge(discoveredBridge) {
     philipsHueBridgesInformation[id] = {};
   }
   const { credentials } = philipsHueBridgesInformation[id];
-  const bridge = {
+  let bridge = bridges.find((bridge) => bridge.id == id);
+  if (bridge) {
+    return;
+  }
+  bridge = {
     name,
     id,
     ip,
@@ -96,9 +100,16 @@ async function onBridgeCredentials(bridge) {
     });
     console.log("got bridge", _bridge);
     _bridges[bridge.id] = _bridge;
+    onBridgeConnection(bridge);
   } catch (error) {
     console.log("failed getting bridge", error);
   }
+}
+
+async function onBridgeConnection(bridge) {
+  const _bridge = _bridges[bridge.id];
+  const groups = await _bridge.getGroup(0); // 0 will fetch all groups.
+  console.log("groups", groups);
 }
 
 async function setupBridges() {
