@@ -8,7 +8,7 @@
 
     <p id="socketConnection"></p>
 
-    <button id="discoverBridges">rediscover bridges</button>
+    <button id="discoverBridges" hidden>rediscover bridges</button>
 
     <div id="bridges">
       <template id="bridgeTemplate">
@@ -98,19 +98,28 @@
         const lightsContainer = bridgeContainer.querySelector(".lights");
         const onGroupUpdate = () => {
           lightsContainer.innerHTML = "";
-          bridge.group.lights.forEach((light) => {
+          for (const lightId in bridge.group.lights) {
             const lightContainer = lightTemplate.content
               .cloneNode(true)
               .querySelector(".light");
-            lightContainer.querySelector("span").innerText = light.id;
+            lightContainer.querySelector("span").innerText = lightId;
             lightContainer
               .querySelector("input")
               .addEventListener("input", (event) => {
                 const value = event.target.value;
-                console.log(light.id, value);
+                const rgb = htmlColorToRgbArray(value);
+                socket.emit("setLights", {
+                  lights: [
+                    {
+                      bridgeId: bridge.id,
+                      lightId,
+                      color: rgb,
+                    },
+                  ],
+                });
               });
             lightsContainer.appendChild(lightContainer);
-          });
+          }
         };
 
         if (bridge.group) {
@@ -133,5 +142,19 @@
         bridgesContainer.appendChild(bridgeContainer);
       });
     });
+
+    // thanks ChatGPT
+    function htmlColorToRgbArray(htmlColor) {
+      // Remove the '#' symbol if present
+      htmlColor = htmlColor.replace("#", "");
+
+      // Parse the hexadecimal color values
+      const red = parseInt(htmlColor.substring(0, 2), 16);
+      const green = parseInt(htmlColor.substring(2, 4), 16);
+      const blue = parseInt(htmlColor.substring(4, 6), 16);
+
+      // Create and return the RGB array
+      return [red, green, blue];
+    }
   </script>
 </html>

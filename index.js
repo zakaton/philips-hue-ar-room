@@ -113,6 +113,7 @@ async function onBridgeCredentials(bridge) {
 
 async function onBridgeConnection(bridge) {
   await getBridgeGroup(bridge);
+  await startBridge(bridge);
 }
 
 async function getBridgeGroup(bridge, overwrite = false) {
@@ -126,15 +127,37 @@ async function getBridgeGroup(bridge, overwrite = false) {
       const group = groups[groupId];
       if (group.type == "Entertainment") {
         console.log("found Entertainment group", group);
+        const lights = {};
+        group.lights.forEach((lightId) => {
+          lights[lightId] = { position: [0, 0, 0] };
+        });
         const groupInformation = {
           id: groupId,
-          lights: group.lights.map((lightId) => {
-            return { id: lightId, position: [0, 0, 0] };
-          }),
+          lights,
         };
         bridgeInformation.group = bridge.group = groupInformation;
         await savePhilipsHueBridgesInformation();
         break;
+      }
+    }
+  }
+}
+
+async function startBridge(bridge) {
+  const _bridge = _bridges[bridge.id];
+  if (_bridge && bridge.group?.id) {
+    try {
+      console.log(`starting bridge ${bridge.id}...`);
+      let connection = await _bridge.start(bridge.group.id);
+      console.log("started bridge");
+    } catch (error) {
+      console.log("error starting bridge", error);
+      if (/DTLS handshake timed out/gi.test(error?.message)) {
+        //A connection is most probably still alive for this group
+        //This can happen if you hot reload your server without
+        //giving enought time to the bridge to timeout the connection
+        //You may want to wait a little and try to connect again if
+        //you endup here
       }
     }
   }
@@ -216,15 +239,33 @@ io.on("connection", (socket) => {
     response(group);
   });
 
-  socket.on("setLights", (message) => {
+  socket.on("setLights", async (message) => {
     const { lights } = message;
 
     let didUpdatePosition = false;
     lights.forEach(({ bridgeId, lightId, color, position }) => {
-      // FILL
+      if (color) {
+        const _bridge = _bridges[bridgeId];
+        if (_bridge) {
+          console.log(`setting ${bridgeId}:${lightId} light to ${color}...`);
+          _bridge.transition(lightId, color);
+        }
+      }
+
+      const bridge = bridges.find((bridge) => bridge.id == bridgeId);
+      if (bridge && position) {
+        console.log(
+          `setting ${bridgeId}:${lightId} position to ${position}...`
+        );
+        bridge.group.lights[lightId].position = position;
+        philipsHueBridgesInformation[bridgeId].group.lights[lightId].position =
+          position;
+        didUpdatePosition = true;
+      }
     });
     if (didUpdatePosition) {
-      savePhilipsHueBridgesInformation();
+      await savePhilipsHueBridgesInformation();
+      socket.emit("bridges", bridges);
     }
   });
 
