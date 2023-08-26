@@ -21,10 +21,10 @@ AFRAME.registerComponent("camera-controls", {
     this.anchor = document.getElementById("handAnchor");
 
     // this.el.addEventListener("thumbstickmoved", this.controlCamera.bind(this));
-    this.el.addEventListener("abuttondown", this.toggleVisibility.bind(this));
-    this.el.addEventListener("bbuttondown", this.createAnchor.bind(this));
-    this.el.addEventListener("triggerdown", this.showAnchor.bind(this));
-    this.el.addEventListener("triggerup", this.hideAnchor.bind(this));
+    // this.el.addEventListener("abuttondown", this.toggleVisibility.bind(this));
+    // this.el.addEventListener("bbuttondown", this.createAnchor.bind(this));
+    // this.el.addEventListener("triggerdown", this.showAnchor.bind(this));
+    // this.el.addEventListener("triggerup", this.hideAnchor.bind(this));
 
     this.showEntities = true;
   },
