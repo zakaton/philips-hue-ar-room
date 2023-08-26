@@ -91,8 +91,8 @@ AFRAME.registerComponent("dynamic-text", {
         const { boundingBox } = text.geometry;
         boundingBox.getSize(textSize);
 
-        const width = textSize.x / 1000;
-        const height = textSize.y / 1000;
+        const width = textSize.x / 1500;
+        const height = textSize.y / 1500;
         planeEntity.setAttribute("width", width);
         planeEntity.setAttribute("height", height);
         if (text.data.baseline !== "center") {
