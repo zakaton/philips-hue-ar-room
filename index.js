@@ -4,7 +4,7 @@ var http = require("http");
 var app = express();
 const { Server } = require("socket.io");
 var fs = require("fs");
-const Phea = require("phea");
+const Phea = require("./phea/phea");
 const mdns = require("mdns");
 const _ = require("lodash");
 
@@ -112,10 +112,20 @@ async function onBridgeCredentials(bridge) {
 }
 
 async function onBridgeConnection(bridge) {
+  await getBridgeLights(bridge);
   await getBridgeGroup(bridge);
-  //await startBridge(bridge);
+  await startBridge(bridge);
 }
 
+async function getBridgeLights(bridge, overwrite = false) {
+  if (!bridge.lights || overwrite) {
+    const _bridge = _bridges[bridge.id];
+    const bridgeInformation = philipsHueBridgesInformation[bridge.id];
+    console.log(`getting lights for bridge ${bridge.id}...`);
+    const lights = await _bridge.getLights();
+    console.log("got lights", lights);
+  }
+}
 async function getBridgeGroup(bridge, overwrite = false) {
   if (!bridge.group || overwrite) {
     const _bridge = _bridges[bridge.id];
@@ -129,7 +139,7 @@ async function getBridgeGroup(bridge, overwrite = false) {
         console.log("found Entertainment group", group);
         const lights = {};
         group.lights.forEach((lightId) => {
-          lights[lightId] = { position: [0, 0, 0] };
+          lights[lightId] = {};
         });
         const groupInformation = {
           id: groupId,
@@ -232,11 +242,10 @@ io.on("connection", (socket) => {
   });
   socket.on("getGroup", async (ip, response) => {
     const bridge = bridges.find((bridge) => bridge.ip == ip);
-    let group;
     if (bridge) {
       await getBridgeGroup(bridge, true);
     }
-    response(group);
+    response(bridge.group);
   });
 
   socket.on("setLights", async (message) => {
