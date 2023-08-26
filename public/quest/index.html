@@ -9,6 +9,7 @@
     <!-- https://github.com/gftruj/aframe-hand-tracking-controls-extras -->
     <script src="/src/components/hand-tracking-controls-extras.js"></script>
     <script src="/src/components/shadow-component.js"></script>
+    <script src="/src/components/laser-controls-component.js"></script>
     <script src="/src/socket.io.min.js"></script>
   </head>
   <body>
@@ -43,6 +44,17 @@
       <a-camera position="0 1.6 0" id="camera">
         <a-entity id="cameraForward" position="0 0 -10"></a-entity>
       </a-camera>
+
+      <a-entity
+        id="leftHandLaserControls"
+        laser-controls-new="hand: left; model: false;"
+        raycaster="objects: .raycastable"
+      ></a-entity>
+      <a-entity
+        id="rightHandLaserControls"
+        laser-controls-new="hand: right; model: false;"
+        raycaster="objects: .raycastable"
+      ></a-entity>
 
       <a-entity
         id="leftHandControls"

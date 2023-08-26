@@ -113,7 +113,7 @@ async function onBridgeCredentials(bridge) {
 
 async function onBridgeConnection(bridge) {
   await getBridgeGroup(bridge);
-  await startBridge(bridge);
+  //await startBridge(bridge);
 }
 
 async function getBridgeGroup(bridge, overwrite = false) {
@@ -148,7 +148,7 @@ async function startBridge(bridge) {
   if (_bridge && bridge.group?.id) {
     try {
       console.log(`starting bridge ${bridge.id}...`);
-      let connection = await _bridge.start(bridge.group.id);
+      await _bridge.start(bridge.group.id);
       console.log("started bridge");
     } catch (error) {
       console.log("error starting bridge", error);

@@ -73,6 +73,10 @@ AFRAME.registerSystem("philips-hue", {
         console.log("connection closed");
         this.onSocketDisconnection();
       });
+      socket.on("bridges", (bridges) => {
+        console.log("bridges", bridges);
+        this.onBridges(bridges);
+      });
     };
     createSocket();
 
@@ -87,6 +91,7 @@ AFRAME.registerSystem("philips-hue", {
 
   onSocketConnection: function () {},
   onSocketDisconnection: function () {},
+  onBridges: function (bridges) {},
 
   onModeUpdate: function () {
     console.log(`new mode: "${this.data.mode}"`);
@@ -332,7 +337,7 @@ AFRAME.registerSystem("philips-hue", {
         }
       });
       if (lights.length > 0) {
-        window.sendMessage({ type: "lights", lights });
+        this.sendSocketMessage("setLights", { lights });
       }
     }
   },
