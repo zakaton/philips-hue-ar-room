@@ -112,9 +112,9 @@ async function onBridgeCredentials(bridge) {
 }
 
 async function onBridgeConnection(bridge) {
-  await getBridgeLights(bridge);
   await getBridgeGroup(bridge);
-  await startBridge(bridge);
+  await getBridgeLights(bridge);
+  //await startBridge(bridge);
 }
 
 async function getBridgeLights(bridge, overwrite = false) {
@@ -124,6 +124,13 @@ async function getBridgeLights(bridge, overwrite = false) {
     console.log(`getting lights for bridge ${bridge.id}...`);
     const lights = await _bridge.getLights();
     console.log("got lights", lights);
+    bridge.lights = {};
+    for (const lightId in lights) {
+      const { name } = lights[lightId];
+      bridge.lights[lightId] = { name };
+    }
+    bridgeInformation.lights = bridge.lights;
+    await savePhilipsHueBridgesInformation();
   }
 }
 async function getBridgeGroup(bridge, overwrite = false) {

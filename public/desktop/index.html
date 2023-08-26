@@ -10,29 +10,31 @@
 
     <button id="discoverBridges" hidden>rediscover bridges</button>
 
-    <div id="bridges">
+    <ol id="bridges">
       <template id="bridgeTemplate">
-        <ol class="bridge">
-          <li>
-            name: <b class="name"></b>
-            <ul>
-              <li>id: <b class="id"></b></li>
-              <li>ip: <b class="ip"></b></li>
-              <li>credentials: <b class="credentials"></b></li>
-              <button class="getCredentials" hidden>
-                get credentials (press bridge button first)
-              </button>
-              <li>group: <b class="group"></b></li>
-              <button class="getGroup" hidden>refresh group</button>
-            </ul>
-            <ul class="lights"></ul>
-          </li>
-        </ol>
+        <li class="bridge">
+          <b class="name"></b>
+          <ul>
+            <li>id: <b class="id"></b></li>
+            <li>ip: <b class="ip"></b></li>
+            <li>credentials: <b class="credentials"></b></li>
+            <button class="getCredentials" hidden>
+              get credentials (press bridge button first)
+            </button>
+            <li>lights: <b class="lights"></b></li>
+            <li>group: <b class="group"></b></li>
+            <button class="getGroup" hidden>refresh group</button>
+          </ul>
+          <ol class="lightControls"></ol>
+        </li>
       </template>
       <template id="lightTemplate">
-        <li class="light">light #<span></span>: <input type="color" /></li>
+        <li class="light">
+          <span class="name"></span>:
+          <input type="color" />
+        </li>
       </template>
-    </div>
+    </ol>
   </body>
   <script>
     const socket = io();
@@ -95,14 +97,17 @@
           });
         }
 
-        const lightsContainer = bridgeContainer.querySelector(".lights");
+        const lightsContainer = bridgeContainer.querySelector(".lightControls");
         const onGroupUpdate = () => {
           lightsContainer.innerHTML = "";
           for (const lightId in bridge.group.lights) {
             const lightContainer = lightTemplate.content
               .cloneNode(true)
               .querySelector(".light");
-            lightContainer.querySelector("span").innerText = lightId;
+            lightContainer.setAttribute("value", lightId);
+
+            lightContainer.querySelector(".name").innerText =
+              bridge.lights[lightId].name;
             lightContainer
               .querySelector("input")
               .addEventListener("input", (event) => {
