@@ -2,7 +2,15 @@ AFRAME.registerSystem("philips-hue", {
   schema: {
     mode: {
       default: "glow",
-      oneOf: ["scene", "glow", "gaze", "flashlight", "torch", "virtual"],
+      oneOf: [
+        "none",
+        "scene",
+        "glow",
+        "gaze",
+        "flashlight",
+        "torch",
+        "virtual",
+      ],
     },
     colorDifferenceThreshold: { type: "number", default: 0.01 },
     intensityScalar: { type: "number", default: 0.7 }, // 0.7
@@ -22,7 +30,6 @@ AFRAME.registerSystem("philips-hue", {
 
   init: function () {
     window.philipsHueSystem = this;
-    this.modes = ["glow", "gaze", "flashlight", "torch"];
     this.entities = [];
     this.tick = AFRAME.utils.throttleTick(this.tick, 1000 / 50, this);
     this.camera = document.getElementById("camera");
@@ -38,10 +45,6 @@ AFRAME.registerSystem("philips-hue", {
     this.controllers.right.addEventListener(
       "gripchanged",
       this.onGripChanged.bind(this)
-    );
-    this.controllers.left.addEventListener(
-      "ybuttondown",
-      this.cycleMode.bind(this)
     );
     this.flashlight = document.getElementById("flashlight");
     this.flashlightPosition = new THREE.Vector3();
@@ -84,14 +87,6 @@ AFRAME.registerSystem("philips-hue", {
 
   onSocketConnection: function () {},
   onSocketDisconnection: function () {},
-
-  cycleMode: function () {
-    let modeIndex = this.modes.indexOf(this.data.mode);
-    modeIndex += 1;
-    modeIndex %= this.modes.length;
-    this.data.mode = this.modes[modeIndex];
-    this.onModeUpdate();
-  },
 
   onModeUpdate: function () {
     console.log(`new mode: "${this.data.mode}"`);
@@ -178,6 +173,8 @@ AFRAME.registerSystem("philips-hue", {
           let { intensity } = philipsHue;
           const newColor = philipsHue._color;
           switch (this.data.mode) {
+            case "none":
+              break;
             case "scene":
               const { color: _color, intensity: _intensity } =
                 philipsHue.light.components.light.light;
