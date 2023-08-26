@@ -6,7 +6,6 @@ AFRAME.registerComponent("laser-controls-new", {
   },
 
   init: function () {
-    console.log("FUCK");
     var config = structuredClone(this.config);
     var data = this.data;
     var el = this.el;
