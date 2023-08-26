@@ -10,6 +10,7 @@
     <script src="/src/components/hand-tracking-controls-extras.js"></script>
     <script src="/src/components/shadow-component.js"></script>
     <script src="/src/components/laser-controls-component.js"></script>
+    <script src="/src/components/dynamic-text-component.js"></script>
     <script src="/src/socket.io.min.js"></script>
   </head>
   <body>
@@ -29,6 +30,10 @@
         <a-asset-item id="torchModel" src="/assets/torch.glb"></a-asset-item>
       </a-assets>
 
+      <a-entity id="ui">
+        <a-entity data-ui="main"></a-entity>
+      </a-entity>
+
       <a-entity visible="false" id="anchor">
         <a-box scale="0.01 0.01 0.01" color="red" visible="false"></a-box>
         <a-entity position="0 -0.2 -0.1">
@@ -42,6 +47,13 @@
       </a-entity>
 
       <a-camera position="0 1.6 0" id="camera">
+        <a-entity id="hud" position="0 0 -0.4">
+          <a-entity
+            dynamic-text="text: hello world;"
+            id="hintText"
+            position="0 0.12 0"
+          ></a-entity>
+        </a-entity>
         <a-entity id="cameraForward" position="0 0 -10"></a-entity>
       </a-camera>
 
