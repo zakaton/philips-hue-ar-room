@@ -156,6 +156,12 @@ AFRAME.registerSystem("philips-hue", {
           case "anchor":
             currentMenu = "anchor";
             break;
+          case "lights":
+            currentMenu = "lights";
+            break;
+          case "demos":
+            currentMenu = "demos";
+            break;
         }
         break;
       case "anchor":
@@ -166,6 +172,13 @@ AFRAME.registerSystem("philips-hue", {
           case "set anchor":
             this.hideUI();
             this.showAnchor();
+            break;
+        }
+        break;
+      case "lights":
+        switch (option) {
+          case "back":
+            currentMenu = "main";
             break;
         }
         break;
