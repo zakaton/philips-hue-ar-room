@@ -42,7 +42,7 @@ AFRAME.registerComponent("dynamic-text", {
     );
     this.el.appendChild(this.planeEntity);
 
-    this.updateRaycastable();
+    //this.updateRaycastable();
     this.planeEntity.addEventListener("mouseenter", () => {
       this.el.setAttribute("dynamic-text", "backgroundColor", "lightgreen");
     });
@@ -147,7 +147,6 @@ AFRAME.registerComponent("dynamic-text", {
   },
 
   updateRaycastable: function () {
-    console.log(this.data.raycastable);
     if (this.data.raycastable) {
       this.planeEntity.classList.add("raycastable");
     } else {

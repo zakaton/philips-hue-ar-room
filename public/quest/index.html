@@ -35,7 +35,16 @@
       <a-entity id="ui" visible="false">
         <a-entity data-ui="main">
           <a-entity
-            dynamic-text="text: Anchor; width: 0.5; raycastable: true; scale: 2;"
+            position="0 0.08 0"
+            dynamic-text="text: Anchor; raycastable: true; scale: 2;"
+          ></a-entity>
+          <a-entity
+            position="0 0 0"
+            dynamic-text="text: Lights; raycastable: true; scale: 2;"
+          ></a-entity>
+          <a-entity
+            position="0 -0.08 0"
+            dynamic-text="text: Demos; raycastable: true; scale: 2;"
           ></a-entity>
           <a-plane
             color="white"
