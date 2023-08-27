@@ -30,8 +30,21 @@
         <a-asset-item id="torchModel" src="/assets/torch.glb"></a-asset-item>
       </a-assets>
 
-      <a-entity id="ui">
-        <a-entity data-ui="main"></a-entity>
+      <a-sky hide-on-enter-ar color="powderblue"></a-sky>
+
+      <a-entity id="ui" visible="false">
+        <a-entity data-ui="main">
+          <a-entity
+            dynamic-text="text: Anchor; width: 0.5; raycastable: true; scale: 2;"
+          ></a-entity>
+          <a-plane
+            color="white"
+            opacity="0.5"
+            width="0.3"
+            height="0.3"
+            position="0 0 -0.001"
+          ></a-plane>
+        </a-entity>
       </a-entity>
 
       <a-entity visible="false" id="anchor">
@@ -46,6 +59,12 @@
         </a-entity>
       </a-entity>
 
+      <a-entity
+        cursor="rayOrigin: mouse;"
+        raycaster="objects: .raycastable"
+        id="cursor"
+      ></a-entity>
+
       <a-camera position="0 1.6 0" id="camera">
         <a-entity id="hud" position="0 0 -0.4">
           <a-entity
@@ -54,7 +73,7 @@
             position="0 0.12 0"
           ></a-entity>
         </a-entity>
-        <a-entity id="cameraForward" position="0 0 -10"></a-entity>
+        <a-entity id="cameraForward" position="0 0 -0.5"></a-entity>
       </a-camera>
 
       <a-entity

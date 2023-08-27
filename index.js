@@ -254,6 +254,13 @@ io.on("connection", (socket) => {
     }
     response(bridge.group);
   });
+  socket.on("getLights", async (ip, response) => {
+    const bridge = bridges.find((bridge) => bridge.ip == ip);
+    if (bridge) {
+      await getBridgeLights(bridge, true);
+    }
+    response(bridge.lights);
+  });
 
   socket.on("setLights", async (message) => {
     const { lights } = message;

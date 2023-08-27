@@ -36,6 +36,7 @@ AFRAME.registerComponent("laser-controls-new", {
       self.modelReady = true;
     });
 
+    let didFlip = false;
     function createRay(evt) {
       var controllerConfig = config[evt.detail.name];
 
@@ -43,7 +44,8 @@ AFRAME.registerComponent("laser-controls-new", {
         return;
       }
 
-      if (data.hand == "left") {
+      if (data.hand == "left" && !didFlip) {
+        didFlip = true;
         controllerConfig.raycaster.direction.x *= -1;
       }
 

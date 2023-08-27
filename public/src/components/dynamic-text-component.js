@@ -12,10 +12,14 @@ AFRAME.registerComponent("dynamic-text", {
       default: "center",
       oneOf: ["left", "center", "right"],
     },
+    raycastable: { type: "boolean", default: false },
+    scale: { type: "number", default: 1 },
   },
 
   init: function () {
     this.textSize = new THREE.Vector3();
+
+    this.updateScale();
 
     this.textEntity = document.createElement("a-text");
     this.textEntity.setAttribute("word-wrap", this.data.wordWrap);
@@ -24,6 +28,7 @@ AFRAME.registerComponent("dynamic-text", {
     this.textEntity.setAttribute("align", this.data.align);
     this.textEntity.setAttribute("width", this.data.width);
     this.textEntity.setAttribute("value", this.data.text);
+    this.textEntity.setAttribute("position", "0 0 0.0001");
     this.el.appendChild(this.textEntity);
 
     this.planeEntity = document.createElement("a-plane");
@@ -36,6 +41,17 @@ AFRAME.registerComponent("dynamic-text", {
       `color: ${this.data.backgroundColor}; shader: flat; opacity: 1`
     );
     this.el.appendChild(this.planeEntity);
+
+    this.updateRaycastable();
+    this.planeEntity.addEventListener("mouseenter", () => {
+      this.el.setAttribute("dynamic-text", "backgroundColor", "lightgreen");
+    });
+    this.planeEntity.addEventListener("mouseleave", () => {
+      this.el.setAttribute("dynamic-text", "backgroundColor", "white");
+    });
+    this.planeEntity.addEventListener("mousedown", () => {
+      console.log("click");
+    });
   },
   update: function (oldData) {
     const diff = AFRAME.utils.diff(oldData, this.data);
@@ -62,6 +78,12 @@ AFRAME.registerComponent("dynamic-text", {
           break;
         case "width":
         case "wordWrap":
+          break;
+        case "scale":
+          this.updateScale();
+          break;
+        case "raycastable":
+          this.updateRaycastable();
           break;
         default:
           console.log("uncaught key", key);
@@ -99,7 +121,6 @@ AFRAME.registerComponent("dynamic-text", {
           planeEntity.object3D.position.y =
             ((text.data.baseline == "top" ? -1 : 1) * height) / 2;
         }
-        console.log(width, height);
       }, 0);
     } else {
       this.el.addEventListener("loaded", () => {
@@ -122,6 +143,22 @@ AFRAME.registerComponent("dynamic-text", {
       "material",
       "opacity",
       this.data.backgroundOpacity
+    );
+  },
+
+  updateRaycastable: function () {
+    console.log(this.data.raycastable);
+    if (this.data.raycastable) {
+      this.planeEntity.classList.add("raycastable");
+    } else {
+      this.planeEntity.classList.remove("raycastable");
+    }
+  },
+
+  updateScale: function () {
+    this.el.setAttribute(
+      "scale",
+      `${this.data.scale} ${this.data.scale} ${this.data.scale}`
     );
   },
 });

@@ -29,6 +29,8 @@ AFRAME.registerSystem("philips-hue", {
   },
 
   init: function () {
+    this.isOculusBrowser = AFRAME.utils.device.isOculusBrowser();
+
     window.philipsHueSystem = this;
     this.entities = [];
     this.tick = AFRAME.utils.throttleTick(this.tick, 1000 / 50, this);
@@ -43,9 +45,35 @@ AFRAME.registerSystem("philips-hue", {
       right: document.getElementById("rightHandControls"),
     };
     this.controllers.right.addEventListener(
+      "abuttondown",
+      this.onAButtonDown.bind(this)
+    );
+    this.controllers.right.addEventListener(
+      "bbuttondown",
+      this.onBButtonDown.bind(this)
+    );
+    this.controllers.left.addEventListener(
+      "triggerdown",
+      this.onLeftTriggerDown.bind(this)
+    );
+
+    this.controllers.right.addEventListener(
       "gripchanged",
       this.onGripChanged.bind(this)
     );
+    this.controllers.left.addEventListener(
+      "xbuttondown",
+      this.onXButtonDown.bind(this)
+    );
+    this.controllers.left.addEventListener(
+      "ybuttondown",
+      this.onYButtonDown.bind(this)
+    );
+    this.controllers.right.addEventListener(
+      "triggerdown",
+      this.onRightTriggerDown.bind(this)
+    );
+
     this.flashlight = document.getElementById("flashlight");
     this.flashlightPosition = new THREE.Vector3();
     this.flashlightForward = document.getElementById("flashlightForward");
@@ -57,6 +85,15 @@ AFRAME.registerSystem("philips-hue", {
 
     this.onModeUpdate();
     this.setupSocketConnection();
+
+    this.uiEntity = document.getElementById("ui");
+    this.uiPosition = new THREE.Vector3();
+
+    if (!this.isOculusBrowser) {
+      setTimeout(() => {
+        this.showUI();
+      }, 500);
+    }
   },
 
   setupSocketConnection: function () {
@@ -109,6 +146,26 @@ AFRAME.registerSystem("philips-hue", {
     }
     this.flashlight.setAttribute("visible", shouldShowFlashlight);
     this.torch.setAttribute("visible", shouldShowTorch);
+  },
+
+  onAButtonDown: function () {
+    console.log("A");
+    this.toggleUI();
+  },
+  onBButtonDown: function () {
+    console.log("B");
+  },
+  onLeftTriggerDown: function () {
+    console.log("left trigger down");
+  },
+  onXButtonDown: function () {
+    console.log("X");
+  },
+  onYButtonDown: function () {
+    console.log("Y");
+  },
+  onRightTriggerDown: function () {
+    console.log("right trigger down");
   },
 
   update: function (oldData) {
@@ -348,6 +405,33 @@ AFRAME.registerSystem("philips-hue", {
     value -= min;
     value /= max - min;
     return value ** exp;
+  },
+
+  isUIVisible: function () {
+    return this.uiEntity.object3D.visible;
+  },
+  toggleUI: function () {
+    if (this.isUIVisible()) {
+      this.hideUI();
+    } else {
+      this.showUI();
+    }
+  },
+  showUI: function () {
+    const { uiEntity, uiPosition, camera } = this;
+
+    this.cameraForward.object3D.getWorldPosition(uiPosition);
+    //uiPosition.y = 0;
+    uiPosition.y -= 0.1;
+    uiEntity.object3D.position.copy(uiPosition);
+
+    //uiEntity.object3D.rotation.y = camera.object3D.rotation.y;
+    uiEntity.object3D.lookAt(camera.object3D.position);
+
+    uiEntity.object3D.visible = true;
+  },
+  hideUI: function () {
+    this.uiEntity.object3D.visible = false;
   },
 });
 
