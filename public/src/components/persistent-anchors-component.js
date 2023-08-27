@@ -168,5 +168,6 @@ AFRAME.registerSystem("persistent-anchors", {
   addAnchoredObjectToScene: function (anchor) {
     this.anchor = anchor;
     this._updateTransformFlag = true;
+    this.sceneEl.emit("persistent-anchor");
   },
 });

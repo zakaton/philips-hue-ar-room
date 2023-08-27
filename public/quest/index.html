@@ -33,18 +33,40 @@
       <a-sky hide-on-enter-ar color="powderblue"></a-sky>
 
       <a-entity id="ui" visible="false">
-        <a-entity data-ui="main">
+        <a-entity data-ui-menu="main">
           <a-entity
             position="0 0.08 0"
-            dynamic-text="text: Anchor; raycastable: true; scale: 2;"
+            dynamic-text="text: anchor; scale: 2;"
           ></a-entity>
           <a-entity
             position="0 0 0"
-            dynamic-text="text: Lights; raycastable: true; scale: 2;"
+            dynamic-text="text: lights; scale: 2;"
+            visible="false"
+            data-requires-anchor
           ></a-entity>
           <a-entity
             position="0 -0.08 0"
-            dynamic-text="text: Demos; raycastable: true; scale: 2;"
+            dynamic-text="text: demos; scale: 2;"
+            visible="false"
+            data-requires-anchor
+          ></a-entity>
+          <a-plane
+            color="white"
+            opacity="0.5"
+            width="0.3"
+            height="0.3"
+            position="0 0 -0.001"
+          ></a-plane>
+        </a-entity>
+
+        <a-entity data-ui-menu="anchor">
+          <a-entity
+            position="0 0.08 0"
+            dynamic-text="text: back; scale: 2;"
+          ></a-entity>
+          <a-entity
+            position="0 0 0"
+            dynamic-text="text: set anchor; scale: 2;"
           ></a-entity>
           <a-plane
             color="white"

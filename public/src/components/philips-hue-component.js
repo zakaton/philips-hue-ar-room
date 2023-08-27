@@ -93,12 +93,103 @@ AFRAME.registerSystem("philips-hue", {
 
     if (!this.isOculusBrowser) {
       setTimeout(() => {
+        this.onPersistentAnchor();
         this.showUI();
       }, 500);
     }
 
     this.sceneEl.addEventListener("enter-vr", this.onEnterVR.bind(this));
     this.sceneEl.addEventListener("exit-vr", this.onExitVR.bind(this));
+
+    this.currentMenu = "main";
+    this.uiMenuEntities = {};
+    this.uiEntity.querySelectorAll("[data-ui-menu]").forEach((uiMenuEntity) => {
+      this.uiMenuEntities[uiMenuEntity.dataset.uiMenu] = uiMenuEntity;
+    });
+
+    this.onMenuUpdate();
+
+    this.uiEntity.addEventListener("click", this.onUIClick.bind(this));
+
+    this.sceneEl.addEventListener(
+      "persistent-anchor",
+      this.onPersistentAnchor.bind(this)
+    );
+    if (persistentAnchorsSystem.anchor) {
+      this.onPersistentAnchor();
+    }
+  },
+
+  onMenuUpdate: function () {
+    for (const menu in this.uiMenuEntities) {
+      const uiMenuEntity = this.uiMenuEntities[menu];
+      const isCurrentMenu = this.isUIVisible() && menu == this.currentMenu;
+      uiMenuEntity.setAttribute("visible", isCurrentMenu);
+      uiMenuEntity.querySelectorAll("[dynamic-text]").forEach((entity) => {
+        entity.setAttribute("dynamic-text", "raycastable", isCurrentMenu);
+      });
+    }
+  },
+
+  onPersistentAnchor: function () {
+    this.uiEntity
+      .querySelectorAll("[data-requires-anchor]")
+      .forEach((entity) => {
+        entity.setAttribute("visible", "true");
+      });
+  },
+
+  onUIClick: function (event) {
+    const menu = event.target.closest("[data-ui-menu]").dataset.uiMenu;
+    const option =
+      event.target.closest("[dynamic-text]").components["dynamic-text"].data
+        .text;
+    this.onMenuUIClick(menu, option);
+  },
+
+  onMenuUIClick: function (menu, option) {
+    //console.log(menu, option);
+    let currentMenu = this.currentMenu;
+    switch (menu) {
+      case "main":
+        switch (option) {
+          case "anchor":
+            currentMenu = "anchor";
+            break;
+        }
+        break;
+      case "anchor":
+        switch (option) {
+          case "back":
+            currentMenu = "main";
+            break;
+          case "set anchor":
+            this.hideUI();
+            this.showAnchor();
+            break;
+        }
+        break;
+      case "demos":
+        switch (option) {
+          case "back":
+            currentMenu = "main";
+            break;
+        }
+        break;
+    }
+    if (currentMenu != this.currentMenu) {
+      this.currentMenu = currentMenu;
+      this.onMenuUpdate();
+    }
+  },
+
+  showAnchor: function () {
+    this.setHintText(`press "B" to set the anchor`);
+    window.cameraControls.right.showAnchor();
+  },
+  hideAnchor: function () {
+    this.setHintText("");
+    window.cameraControls.right.hideAnchor();
   },
 
   onEnterVR: function () {
@@ -189,6 +280,11 @@ AFRAME.registerSystem("philips-hue", {
   },
   onBButtonDown: function () {
     console.log("B");
+    if (window.cameraControls.right.isAnchorVisible) {
+      window.cameraControls.right.createAnchor();
+      this.hideAnchor();
+      this.showUI();
+    }
   },
   onLeftTriggerDown: function () {
     console.log("left trigger down");
@@ -472,9 +568,12 @@ AFRAME.registerSystem("philips-hue", {
     }
 
     uiEntity.object3D.visible = true;
+    this.onMenuUpdate();
+    this.hideAnchor();
   },
   hideUI: function () {
     this.uiEntity.object3D.visible = false;
+    this.onMenuUpdate();
   },
 });
 

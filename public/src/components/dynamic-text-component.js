@@ -50,7 +50,7 @@ AFRAME.registerComponent("dynamic-text", {
       this.el.setAttribute("dynamic-text", "backgroundColor", "white");
     });
     this.planeEntity.addEventListener("mousedown", () => {
-      console.log("click");
+      //console.log("click");
     });
   },
   update: function (oldData) {
