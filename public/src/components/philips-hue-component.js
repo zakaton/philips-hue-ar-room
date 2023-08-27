@@ -31,6 +31,8 @@ AFRAME.registerSystem("philips-hue", {
   init: function () {
     this.isOculusBrowser = AFRAME.utils.device.isOculusBrowser();
 
+    this.hintTextEntity = document.getElementById("hintText");
+
     window.philipsHueSystem = this;
     this.entities = [];
     this.tick = AFRAME.utils.throttleTick(this.tick, 1000 / 50, this);
@@ -94,6 +96,39 @@ AFRAME.registerSystem("philips-hue", {
         this.showUI();
       }, 500);
     }
+
+    this.sceneEl.addEventListener("enter-vr", this.onEnterVR.bind(this));
+    this.sceneEl.addEventListener("exit-vr", this.onExitVR.bind(this));
+  },
+
+  onEnterVR: function () {
+    console.log("enter-vr");
+    if (this.sceneEl.is("ar-mode")) {
+      this.isInAR = true;
+      this.onEnterAR();
+    }
+  },
+  onExitVR: function () {
+    console.log("exit-vr");
+    if (this.isInAR == true) {
+      this.isInAR = false;
+      this.onExitAR();
+    }
+  },
+
+  onEnterAR: function () {
+    console.log("enter AR");
+    if (!this.isUIVisible() && !this.didOpenUIAtLeastOnce) {
+      this.setHintText(`Press "A" to toggle the Menu`);
+    }
+  },
+  onExitAR: function () {
+    console.log("exit AR");
+    this.setHintText("");
+  },
+
+  setHintText: function (text) {
+    this.hintTextEntity.setAttribute("dynamic-text", "text", text);
   },
 
   setupSocketConnection: function () {
@@ -418,15 +453,23 @@ AFRAME.registerSystem("philips-hue", {
     }
   },
   showUI: function () {
+    this.didOpenUIAtLeastOnce = true;
+    this.setHintText("");
+
     const { uiEntity, uiPosition, camera } = this;
 
     this.cameraForward.object3D.getWorldPosition(uiPosition);
     //uiPosition.y = 0;
-    uiPosition.y -= 0.1;
+    if (this.isOculusBrowser) {
+      uiPosition.y -= 0.1;
+    }
     uiEntity.object3D.position.copy(uiPosition);
 
-    //uiEntity.object3D.rotation.y = camera.object3D.rotation.y;
-    uiEntity.object3D.lookAt(camera.object3D.position);
+    if (this.isOculusBrowser) {
+      uiEntity.object3D.lookAt(camera.object3D.position);
+    } else {
+      uiEntity.object3D.rotation.y = camera.object3D.rotation.y;
+    }
 
     uiEntity.object3D.visible = true;
   },

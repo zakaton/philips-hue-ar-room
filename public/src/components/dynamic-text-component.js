@@ -92,7 +92,7 @@ AFRAME.registerComponent("dynamic-text", {
   },
 
   updateText: function () {
-    // FILL - update text and plane
+    this.textEntity.setAttribute("value", this.data.text);
     this.updateTextSize();
   },
   updateTextSize: function () {
@@ -100,7 +100,7 @@ AFRAME.registerComponent("dynamic-text", {
       setTimeout(() => {
         this.waitedToLoad = true;
         this.updateTextSize();
-      }, 500);
+      }, 1000);
       return;
     }
 

@@ -76,11 +76,7 @@
 
       <a-camera position="0 1.6 0" id="camera">
         <a-entity id="hud" position="0 0 -0.4">
-          <a-entity
-            dynamic-text="text: hello world;"
-            id="hintText"
-            position="0 0.12 0"
-          ></a-entity>
+          <a-entity dynamic-text id="hintText" position="0 0.12 0"></a-entity>
         </a-entity>
         <a-entity id="cameraForward" position="0 0 -0.5"></a-entity>
       </a-camera>
@@ -148,8 +144,8 @@
         </a-entity>
       </a-entity>
 
-      <a-entity id="sceneContainer" position="0 1 -3.219">
-        <a-entity id="internalAnchor" position="0 0 0">
+      <a-entity id="sceneContainer" position="0 0 0">
+        <a-entity id="internalAnchor" position="0 0 0" visible="false">
           <a-entity position="0 -0.2 -0.1">
             <a-entity
               gltf-model="#anchorModel"

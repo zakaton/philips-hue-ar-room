@@ -36,6 +36,8 @@ AFRAME.registerComponent("laser-controls-new", {
       self.modelReady = true;
     });
 
+    var far = 2;
+
     let didFlip = false;
     function createRay(evt) {
       var controllerConfig = config[evt.detail.name];
@@ -54,6 +56,7 @@ AFRAME.registerComponent("laser-controls-new", {
       var raycasterConfig = AFRAME.utils.extend(
         {
           showLine: true,
+          far,
         },
         controllerConfig.raycaster || {}
       );
@@ -67,6 +70,7 @@ AFRAME.registerComponent("laser-controls-new", {
           evt.detail.rayOrigin.direction
         );
         raycasterConfig.showLine = true;
+        raycasterConfig.far = far;
       }
 
       // Only apply a default raycaster if it does not yet exist. This prevents it overwriting
