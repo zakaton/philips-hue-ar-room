@@ -92,6 +92,12 @@ AFRAME.registerSystem("philips-hue", {
       this.toggleLight.bind(this)
     );
 
+    this.toggleDebugEntity = document.getElementById("toggleDebug");
+    this.toggleDebugEntity.addEventListener(
+      "mousedown",
+      this.toggleDebug.bind(this)
+    );
+
     this.brightnessSliderEntity = document.getElementById("brightnessSlider");
     this.brightnessSliderEntity.addEventListener(
       "sliderValue",
@@ -211,6 +217,11 @@ AFRAME.registerSystem("philips-hue", {
     }
   },
 
+  toggleDebug: function () {
+    this.data.debug = !this.data.debug;
+    this.onDebugUpdate();
+  },
+
   onMenuUpdate: function () {
     for (const menu in this.uiMenuEntities) {
       const uiMenuEntity = this.uiMenuEntities[menu];
@@ -232,7 +243,7 @@ AFRAME.registerSystem("philips-hue", {
   selectLight: function (light) {
     console.log(light);
     if (this.selectedLight) {
-      this.selectedLight.entity.setAttribute("philips-hue", "debug", false);
+      this.deselectLight();
     }
     this.selectedLight = light;
     this.currentMenu = "light";
@@ -242,6 +253,12 @@ AFRAME.registerSystem("philips-hue", {
     this.selectedLight.entity.setAttribute("philips-hue", "debug", true);
 
     this.updateSliders();
+  },
+  deselectLight: function () {
+    if (this.selectedLight) {
+      this.selectedLight.entity.setAttribute("philips-hue", "debug", false);
+      this.selectedLight = null;
+    }
   },
 
   updateSliders: function () {
@@ -338,6 +355,7 @@ AFRAME.registerSystem("philips-hue", {
             this.hideUI();
             break;
           case "back":
+            this.deselectLight();
             currentMenu = "lights";
             break;
         }
@@ -599,9 +617,25 @@ AFRAME.registerSystem("philips-hue", {
 
     const diffKeys = Object.keys(diff);
 
-    if (diffKeys.includes("mode")) {
-      this.onModeUpdate();
-    }
+    diffKeys.forEach((key) => {
+      switch (key) {
+        case "mode":
+          this.onModeUpdate();
+          break;
+        case "debug":
+          this.onDebugUpdate();
+          break;
+      }
+    });
+  },
+
+  onDebugUpdate: function () {
+    this.toggleDebugEntity.setAttribute(
+      "dynamic-text",
+      "text",
+      this.data.debug ? "D" : "d"
+    );
+    this.entities.forEach((entity) => entity.philipsHue.onDebugUpdate());
   },
 
   onGripChanged: function (event) {
@@ -956,6 +990,9 @@ AFRAME.registerComponent("philips-hue", {
   },
 
   onDebugUpdate: function () {
-    this.sphere.setAttribute("visible", this.data.debug ? "true" : "false");
+    this.sphere.setAttribute(
+      "visible",
+      this.system.data.debug || this.data.debug ? "true" : "false"
+    );
   },
 });
