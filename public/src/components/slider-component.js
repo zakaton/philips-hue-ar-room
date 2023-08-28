@@ -12,6 +12,8 @@ AFRAME.registerComponent("slider", {
   },
 
   init: function () {
+    this.isOculusBrowser = AFRAME.utils.device.isOculusBrowser();
+
     this.ringEntity = document.createElement("a-ring");
     this.ringEntity.setAttribute("color", this.data.color);
     this.ringEntity.setAttribute("shader", "flat");
@@ -53,6 +55,8 @@ AFRAME.registerComponent("slider", {
       "raycaster-intersected-cleared",
       this.onRaycasterIntersectedCleared.bind(this)
     );
+
+    this.value = new THREE.Vector2();
   },
 
   onRaycasterIntersected: function (event) {
@@ -62,7 +66,7 @@ AFRAME.registerComponent("slider", {
     this.raycaster = null;
   },
   tick: function () {
-    if (true || !this.isMouseDown) {
+    if (this.isOculusBrowser && !this.isMouseDown) {
       return;
     }
     if (!this.raycaster) {
@@ -76,7 +80,15 @@ AFRAME.registerComponent("slider", {
       return;
     }
 
-    console.log(intersection.uv);
+    this.value.copy(intersection.uv);
+    this.updateSlider();
+  },
+
+  updateSlider: function () {
+    let x = this.value.x - 0.5;
+    x *= this.data.width;
+    this.ringEntity.object3D.position.x = x;
+    this.el.emit("sliderValue", { value: this.value });
   },
 
   update: function (oldData) {

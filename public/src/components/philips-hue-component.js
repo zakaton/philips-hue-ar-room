@@ -147,6 +147,11 @@ AFRAME.registerSystem("philips-hue", {
           entity.setAttribute("dynamic-text", "raycastable", isCurrentMenu);
         }
       });
+      uiMenuEntity.querySelectorAll("[slider]").forEach((entity) => {
+        if (entity.dataset.notRaycastable == undefined) {
+          entity.setAttribute("slider", "raycastable", isCurrentMenu);
+        }
+      });
     }
   },
 
