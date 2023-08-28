@@ -79,6 +79,75 @@
 
         <a-entity data-ui-menu="lights">
           <a-entity
+            position="0 0.24 0"
+            dynamic-text="text: back; scale: 2;"
+          ></a-entity>
+          <a-entity
+            position="0 0.16 0"
+            dynamic-text="text: light A; scale: 2;"
+            data-light
+          ></a-entity>
+          <a-entity
+            position="0 0.08 0"
+            dynamic-text="text: light B; scale: 2;"
+            data-light
+          ></a-entity>
+          <a-entity
+            position="0 0 0"
+            dynamic-text="text: light C; scale: 2;"
+            data-light
+          ></a-entity>
+          <a-entity
+            position="0 -0.08 0"
+            dynamic-text="text: light D; scale: 2;"
+            data-light
+          ></a-entity>
+          <a-entity
+            position="0 -0.16 0"
+            dynamic-text="text: light E; scale: 2;"
+            data-light
+          ></a-entity>
+          <a-entity
+            position="-0.15 -0.24 0"
+            dynamic-text="text: <; scale: 3;"
+            id="previousLights"
+          ></a-entity>
+          <a-entity
+            position="0 -0.24 0"
+            data-not-raycastable
+            dynamic-text="text: 0/0; scale: 2;"
+            id="lightsPageIndex"
+          ></a-entity>
+          <a-entity
+            position="0.15 -0.24 0"
+            dynamic-text="text: >; scale: 3;"
+            id="nextLights"
+          ></a-entity>
+          <a-plane
+            color="white"
+            opacity="0.5"
+            width="0.5"
+            height="0.6"
+            position="0 0 -0.001"
+          ></a-plane>
+        </a-entity>
+
+        <a-entity data-ui-menu="light">
+          <a-entity
+            position="0 0.04 0"
+            dynamic-text="text: back; scale: 2;"
+          ></a-entity>
+          <a-plane
+            color="white"
+            opacity="0.5"
+            width="0.3"
+            height="0.2"
+            position="0 0 -0.001"
+          ></a-plane>
+        </a-entity>
+
+        <a-entity data-ui-menu="demos">
+          <a-entity
             position="0 0.04 0"
             dynamic-text="text: back; scale: 2;"
           ></a-entity>

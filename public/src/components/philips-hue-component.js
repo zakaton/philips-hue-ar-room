@@ -103,11 +103,24 @@ AFRAME.registerSystem("philips-hue", {
     this.sceneEl.addEventListener("enter-vr", this.onEnterVR.bind(this));
     this.sceneEl.addEventListener("exit-vr", this.onExitVR.bind(this));
 
-    this.currentMenu = "main";
+    this.currentMenu = "lights";
     this.uiMenuEntities = {};
     this.uiEntity.querySelectorAll("[data-ui-menu]").forEach((uiMenuEntity) => {
       this.uiMenuEntities[uiMenuEntity.dataset.uiMenu] = uiMenuEntity;
     });
+
+    this.previousLightsEntity = document.getElementById("previousLights");
+    this.lightsPageEntities = Array.from(
+      document.querySelectorAll("[data-light]")
+    );
+    this.lightsPageEntities.forEach((lightsPageEntity) => {
+      lightsPageEntity.addEventListener("click", () => {
+        this.selectLight(lightsPageEntity._light);
+      });
+    });
+    this.lightsPageIndex = 0;
+    this.lightsPageIndexEntity = document.getElementById("lightsPageIndex");
+    this.nextLightsEntity = document.getElementById("nextLights");
 
     this.onMenuUpdate();
 
@@ -128,9 +141,18 @@ AFRAME.registerSystem("philips-hue", {
       const isCurrentMenu = this.isUIVisible() && menu == this.currentMenu;
       uiMenuEntity.setAttribute("visible", isCurrentMenu);
       uiMenuEntity.querySelectorAll("[dynamic-text]").forEach((entity) => {
-        entity.setAttribute("dynamic-text", "raycastable", isCurrentMenu);
+        if (entity.dataset.notRaycastable == undefined) {
+          entity.setAttribute("dynamic-text", "raycastable", isCurrentMenu);
+        }
       });
     }
+  },
+
+  selectLight: function (_light) {
+    console.log(_light);
+    this.selectedLight = _light;
+    this.currentMenu = "light";
+    this.onMenuUpdate();
   },
 
   onPersistentAnchor: function () {
@@ -178,6 +200,24 @@ AFRAME.registerSystem("philips-hue", {
         }
         break;
       case "lights":
+        switch (option) {
+          case "back":
+            currentMenu = "main";
+            break;
+          case "<":
+            this.lightsPageIndex = Math.max(0, this.lightsPageIndex - 1);
+            this.onLightsPageIndexUpdate();
+            break;
+          case ">":
+            this.lightsPageIndex = Math.min(
+              this.maxLightsPageIndex,
+              this.lightsPageIndex + 1
+            );
+            this.onLightsPageIndexUpdate();
+            break;
+        }
+        break;
+      case "light":
         switch (option) {
           case "back":
             currentMenu = "main";
@@ -290,7 +330,60 @@ AFRAME.registerSystem("philips-hue", {
 
         this.sceneContainer.appendChild(lightEntity);
         this.entities.push(lightEntity);
+        this.lights.push({ bridgeIndex, lightId, name });
       }
+    });
+
+    this.lightsPageIndex = 0;
+    this.maxLightsPageIndex = Math.ceil(this.lights.length / 5) - 1;
+    this.onLightsPageIndexUpdate();
+  },
+  onLightsPageIndexUpdate: function () {
+    let shouldShowPreviousLightsEntity = false;
+    let shouldShowLightsPageEntity = false;
+    let shouldShowNextLightsEntity = false;
+
+    if (this.maxLightsPageIndex > 0) {
+      shouldShowLightsPageEntity = true;
+    }
+
+    if (shouldShowLightsPageEntity) {
+      if (this.lightsPageIndex > 0) {
+        shouldShowPreviousLightsEntity = true;
+      }
+      if (this.lightsPageIndex < this.maxLightsPageIndex) {
+        shouldShowNextLightsEntity = true;
+      }
+    }
+
+    this.previousLightsEntity.setAttribute(
+      "visible",
+      shouldShowPreviousLightsEntity
+    );
+    this.lightsPageIndexEntity.setAttribute(
+      "visible",
+      shouldShowLightsPageEntity
+    );
+    this.nextLightsEntity.setAttribute("visible", shouldShowNextLightsEntity);
+
+    if (shouldShowLightsPageEntity) {
+      this.lightsPageIndexEntity.setAttribute(
+        "dynamic-text",
+        "text",
+        `${this.lightsPageIndex}/${this.maxLightsPageIndex}`
+      );
+    }
+
+    let baseLightIndex = this.lightsPageIndex * 5;
+    this.lightsPageEntities.forEach((entity, index) => {
+      const lightIndex = baseLightIndex + index;
+      const light = this.lights[lightIndex];
+      entity._light = light;
+      entity.setAttribute("visible", Boolean(light));
+      if (light) {
+        entity.setAttribute("dynamic-text", "text", light.name);
+      }
+      entity.setAttribute("dynamic-text", "raycastable", Boolean(light));
     });
   },
 
