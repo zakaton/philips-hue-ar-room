@@ -220,7 +220,7 @@ AFRAME.registerSystem("philips-hue", {
       case "light":
         switch (option) {
           case "back":
-            currentMenu = "main";
+            currentMenu = "lights";
             break;
         }
         break;
