@@ -1,7 +1,7 @@
 AFRAME.registerSystem("philips-hue", {
   schema: {
     mode: {
-      default: "glow",
+      default: "none",
       oneOf: [
         "none",
         "scene",
@@ -86,6 +86,27 @@ AFRAME.registerSystem("philips-hue", {
     this.torchFlamePosition = new THREE.Vector3();
 
     this.lightNameEntity = document.getElementById("lightName");
+    this.toggleLightEntity = document.getElementById("toggleLight");
+    this.toggleLightEntity.addEventListener(
+      "mousedown",
+      this.toggleLight.bind(this)
+    );
+
+    this.brightnessSliderEntity = document.getElementById("brightnessSlider");
+    this.brightnessSliderEntity.addEventListener(
+      "sliderValue",
+      this.onSliderValue.bind(this)
+    );
+    this.hueSliderEntity = document.getElementById("hueSlider");
+    this.hueSliderEntity.addEventListener(
+      "sliderValue",
+      this.onSliderValue.bind(this)
+    );
+    this.saturationSliderEntity = document.getElementById("saturationSlider");
+    this.saturationSliderEntity.addEventListener(
+      "sliderValue",
+      this.onSliderValue.bind(this)
+    );
 
     this.onModeUpdate();
     this.setupSocketConnection();
@@ -98,6 +119,10 @@ AFRAME.registerSystem("philips-hue", {
         this.onPersistentAnchor();
         this.showUI();
       }, 500);
+    }
+
+    if (!this.isOculusBrowser) {
+      document.addEventListener("keydown", this.onKeyDown.bind(this));
     }
 
     this.sceneContainer = document.querySelector("#sceneContainer");
@@ -116,7 +141,7 @@ AFRAME.registerSystem("philips-hue", {
       document.querySelectorAll("[data-light]")
     );
     this.lightsPageEntities.forEach((lightsPageEntity) => {
-      lightsPageEntity.addEventListener("click", () => {
+      lightsPageEntity.addEventListener("mousedown", () => {
         this.selectLight(lightsPageEntity._light);
       });
     });
@@ -126,7 +151,7 @@ AFRAME.registerSystem("philips-hue", {
 
     this.onMenuUpdate();
 
-    this.uiEntity.addEventListener("click", this.onUIClick.bind(this));
+    this.uiEntity.addEventListener("mousedown", this.onUIClick.bind(this));
 
     this.sceneEl.addEventListener(
       "persistent-anchor",
@@ -134,6 +159,55 @@ AFRAME.registerSystem("philips-hue", {
     );
     if (persistentAnchorsSystem.anchor) {
       this.onPersistentAnchor();
+    }
+  },
+
+  onKeyDown: function (event) {
+    switch (event.key) {
+      case " ":
+        this.toggleUI();
+        break;
+    }
+  },
+
+  onSliderValue: function (event) {
+    if (this.selectedLight) {
+      const { value } = event.detail;
+      const { philipsHue } = this.selectedLight.entity;
+      let shouldUpdateHSL = false;
+      switch (event.target) {
+        case this.hueSliderEntity:
+          //console.log("hue", value);
+          philipsHue.hsl.x = value;
+          shouldUpdateHSL = true;
+          break;
+        case this.brightnessSliderEntity:
+          //console.log("brightness", value);
+          philipsHue.intensity = value;
+          break;
+        case this.saturationSliderEntity:
+          //console.log("saturation", value);
+          philipsHue.hsl.y = value;
+          shouldUpdateHSL = true;
+          break;
+      }
+
+      if (shouldUpdateHSL) {
+        philipsHue._color.setHSL(philipsHue.hsl.x, philipsHue.hsl.y, 0.5);
+      }
+    }
+  },
+
+  toggleLight: function () {
+    if (this.selectedLight) {
+      const { entity } = this.selectedLight;
+      const { philipsHue } = entity;
+      philipsHue.intensity = philipsHue.intensity ? 0 : 1;
+      this.toggleLightEntity.setAttribute(
+        "dynamic-text",
+        "text",
+        philipsHue.intensity ? "on" : "off"
+      );
     }
   },
 
@@ -164,9 +238,31 @@ AFRAME.registerSystem("philips-hue", {
     this.currentMenu = "light";
     this.onMenuUpdate();
 
-    // FILL
     this.lightNameEntity.setAttribute("dynamic-text", "text", light.name);
     this.selectedLight.entity.setAttribute("philips-hue", "debug", true);
+
+    this.updateSliders();
+  },
+
+  updateSliders: function () {
+    const { philipsHue } = this.selectedLight.entity;
+    if (!philipsHue) {
+      this.selectedLight.entity.addEventListener("loaded", () =>
+        this.updateSliders()
+      );
+      return;
+    }
+    this.hueSliderEntity.components["slider"].setValue(philipsHue.hsl.x);
+    this.brightnessSliderEntity.components["slider"].setValue(
+      philipsHue.intensity
+    );
+    this.saturationSliderEntity.components["slider"].setValue(philipsHue.hsl.y);
+
+    this.toggleLightEntity.setAttribute(
+      "dynamic-text",
+      "text",
+      philipsHue.intensity ? "on" : "off"
+    );
   },
 
   onPersistentAnchor: function () {
@@ -237,6 +333,10 @@ AFRAME.registerSystem("philips-hue", {
         break;
       case "light":
         switch (option) {
+          case "set position":
+            this.showLightPositioning();
+            this.hideUI();
+            break;
           case "back":
             currentMenu = "lights";
             break;
@@ -248,7 +348,7 @@ AFRAME.registerSystem("philips-hue", {
             currentMenu = "main";
             break;
           default:
-            console.log("option", option);
+            //console.log("option", option);
             this.data.mode = option;
             this.onModeUpdate();
             //this.hideUI();
@@ -259,6 +359,21 @@ AFRAME.registerSystem("philips-hue", {
     if (currentMenu != this.currentMenu) {
       this.currentMenu = currentMenu;
       this.onMenuUpdate();
+    }
+  },
+
+  showLightPositioning: function () {
+    this.setHintText(`press "B" to set light position`);
+    this.isPositioningLight = true;
+    // FILL - if light has no position, put in front of user
+  },
+  hideLightPositioning: function () {
+    this.isPositioningLight = false;
+  },
+  positioningLightTick: function () {
+    if (this.selectedLight) {
+      console.log("TICK");
+      // FILL - update hue entity if sphere is selected, using fixed transform relative to controller
     }
   },
 
@@ -344,6 +459,7 @@ AFRAME.registerSystem("philips-hue", {
       for (const lightId in group.lights) {
         const { name, position } = lights[lightId];
         const lightEntity = document.createElement("a-entity");
+        lightEntity.id = `${bridgeIndex}-${lightId}-${name}`;
         lightEntity.setAttribute(
           "philips-hue",
           `bridge: ${bridgeIndex}; light: ${lightId}; name: ${name}`
@@ -441,6 +557,13 @@ AFRAME.registerSystem("philips-hue", {
     this.torch.setAttribute("visible", shouldShowTorch);
   },
 
+  positionLight: function () {
+    if (this.selectedLight) {
+      // FILL
+      // send message to update position
+    }
+  },
+
   onAButtonDown: function () {
     console.log("A");
     this.toggleUI();
@@ -450,6 +573,11 @@ AFRAME.registerSystem("philips-hue", {
     if (window.cameraControls.right.isAnchorVisible) {
       window.cameraControls.right.createAnchor();
       this.hideAnchor();
+      this.showUI();
+    }
+    if (this.isPositioningLight) {
+      this.positionLight();
+      this.hideLightPositioning();
       this.showUI();
     }
   },
@@ -491,11 +619,11 @@ AFRAME.registerSystem("philips-hue", {
   },
 
   tick: function (time, timeDelta) {
-    if (
-      time > 0 &&
-      window.socket?.readyState == WebSocket.OPEN &&
-      window.sendMessage
-    ) {
+    if (time > 0 && window.socket?.connected && this.sendSocketMessage) {
+      if (this.isPositioningLight) {
+        this.positioningLightTick();
+      }
+
       const lights = [];
       const { position, vector, cameraForwardPosition } = this;
       switch (this.data.mode) {
@@ -737,6 +865,7 @@ AFRAME.registerSystem("philips-hue", {
     uiEntity.object3D.visible = true;
     this.onMenuUpdate();
     this.hideAnchor();
+    this.hideLightPositioning();
   },
   hideUI: function () {
     this.uiEntity.object3D.visible = false;
@@ -760,7 +889,8 @@ AFRAME.registerComponent("philips-hue", {
     return color;
   },
   init: async function () {
-    //this.system.addEntity(this.el);
+    //this.system.addEntity(this.el);t
+    this.hsl = new THREE.Vector3();
     this.color = new THREE.Color();
     this._color = new THREE.Color();
     this.previousColor = new THREE.Color();

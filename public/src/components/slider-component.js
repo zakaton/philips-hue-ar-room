@@ -84,11 +84,20 @@ AFRAME.registerComponent("slider", {
     this.updateSlider();
   },
 
-  updateSlider: function () {
+  updateRing: function () {
     let x = this.value.x - 0.5;
     x *= this.data.width;
     this.ringEntity.object3D.position.x = x;
-    this.el.emit("sliderValue", { value: this.value });
+  },
+
+  updateSlider: function () {
+    this.updateRing();
+    this.el.emit("sliderValue", { value: this.value.x });
+  },
+
+  setValue: function (value) {
+    this.value.x = value;
+    this.updateRing();
   },
 
   update: function (oldData) {

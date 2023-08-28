@@ -135,21 +135,53 @@
 
         <a-entity data-ui-menu="light">
           <a-entity
-            position="0 0.08 0"
+            position="0 0.32 0"
             dynamic-text="text: back; scale: 2;"
           ></a-entity>
           <a-entity
-            position="0 0.00 0"
+            position="0 0.24 0"
             dynamic-text="text: name; scale: 2;"
             id="lightName"
             data-not-raycastable
           ></a-entity>
-          <a-entity slider position="0 -0.08 0"></a-entity>
+          <a-entity
+            position="0 0.16 0"
+            dynamic-text="text: on; scale: 2;"
+            id="toggleLight"
+          ></a-entity>
+          <a-entity
+            position="0 0.08 0"
+            dynamic-text="text: brightness; scale: 2;"
+            data-not-raycastable
+          ></a-entity>
+          <a-entity id="brightnessSlider" slider position="0 0.02 0"></a-entity>
+          <a-entity
+            position="0 -0.06 0"
+            dynamic-text="text: hue; scale: 2;"
+            data-not-raycastable
+          ></a-entity>
+          <a-entity id="hueSlider" slider position="0 -0.11 0"></a-entity>
+          <a-entity
+            position="0 -0.19 0"
+            dynamic-text="text: saturation; scale: 2;"
+            data-not-raycastable
+          ></a-entity>
+          <a-entity
+            id="saturationSlider"
+            slider
+            position="0 -0.24 0"
+          ></a-entity>
+
+          <a-entity
+            position="0 -0.33 0"
+            dynamic-text="text: set position; scale: 2;"
+            id="setLightPosition"
+          ></a-entity>
           <a-plane
             color="white"
             opacity="0.5"
             width="0.5"
-            height="0.5"
+            height="0.8"
             position="0 0 -0.001"
           ></a-plane>
         </a-entity>
