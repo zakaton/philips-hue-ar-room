@@ -98,6 +98,8 @@ AFRAME.registerSystem("philips-hue", {
       }, 500);
     }
 
+    this.sceneContainer = document.querySelector("#sceneContainer");
+
     this.sceneEl.addEventListener("enter-vr", this.onEnterVR.bind(this));
     this.sceneEl.addEventListener("exit-vr", this.onExitVR.bind(this));
 
@@ -267,7 +269,30 @@ AFRAME.registerSystem("philips-hue", {
 
   onSocketConnection: function () {},
   onSocketDisconnection: function () {},
-  onBridges: function (bridges) {},
+  onBridges: function (bridges) {
+    this.entities.forEach((entity) => entity.remove());
+    this.entities.length = 0;
+
+    this.bridges = bridges;
+    this.lights = [];
+    this.bridges.forEach((bridge, bridgeIndex) => {
+      const { group, lights } = bridge;
+      for (const lightId in group.lights) {
+        const { name, position } = lights[lightId];
+        const lightEntity = document.createElement("a-entity");
+        lightEntity.setAttribute(
+          "philips-hue",
+          `bridge: ${bridgeIndex}; light: ${lightId}; name: ${name}`
+        );
+        if (position) {
+          lightEntity.setAttribute("position", position.join(" "));
+        }
+
+        this.sceneContainer.appendChild(lightEntity);
+        this.entities.push(lightEntity);
+      }
+    });
+  },
 
   onModeUpdate: function () {
     console.log(`new mode: "${this.data.mode}"`);
@@ -594,6 +619,7 @@ AFRAME.registerComponent("philips-hue", {
   schema: {
     bridge: { type: "number" },
     light: { type: "number" },
+    name: { type: "string" },
   },
   threeLightToPhilipsHueColor: function (color, intensity) {
     color = color
@@ -604,7 +630,7 @@ AFRAME.registerComponent("philips-hue", {
     return color;
   },
   init: async function () {
-    this.system.addEntity(this.el);
+    //this.system.addEntity(this.el);
     this.color = new THREE.Color();
     this._color = new THREE.Color();
     this.previousColor = new THREE.Color();
@@ -659,6 +685,6 @@ AFRAME.registerComponent("philips-hue", {
     }
   },
   remove: function () {
-    this.system.removeEntity(this);
+    //this.system.removeEntity(this);
   },
 });

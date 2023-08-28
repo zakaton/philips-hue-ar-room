@@ -280,8 +280,8 @@ io.on("connection", (socket) => {
         console.log(
           `setting ${bridgeId}:${lightId} position to ${position}...`
         );
-        bridge.group.lights[lightId].position = position;
-        philipsHueBridgesInformation[bridgeId].group.lights[lightId].position =
+        bridge.lights[lightId].position = position;
+        philipsHueBridgesInformation[bridgeId].lights[lightId].position =
           position;
         didUpdatePosition = true;
       }
