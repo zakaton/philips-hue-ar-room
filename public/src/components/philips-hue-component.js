@@ -229,6 +229,12 @@ AFRAME.registerSystem("philips-hue", {
           case "back":
             currentMenu = "main";
             break;
+          default:
+            console.log("option", option);
+            this.data.mode = option;
+            this.onModeUpdate();
+            //this.hideUI();
+            break;
         }
         break;
     }
@@ -389,8 +395,10 @@ AFRAME.registerSystem("philips-hue", {
 
   onModeUpdate: function () {
     console.log(`new mode: "${this.data.mode}"`);
+
     let shouldShowFlashlight = false;
     let shouldShowTorch = false;
+    let shouldShowMode = true;
     switch (this.data.mode) {
       case "flashlight":
         shouldShowFlashlight = true;
@@ -398,8 +406,16 @@ AFRAME.registerSystem("philips-hue", {
       case "torch":
         shouldShowTorch = true;
         break;
+      case "none":
+        shouldShowMode = false;
+        break;
       default:
         break;
+    }
+    if (shouldShowMode) {
+      this.setHintText(`mode: ${this.data.mode}`);
+    } else {
+      this.setHintText("");
     }
     this.flashlight.setAttribute("visible", shouldShowFlashlight);
     this.torch.setAttribute("visible", shouldShowTorch);
