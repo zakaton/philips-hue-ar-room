@@ -53,6 +53,7 @@ AFRAME.registerComponent("dynamic-text", {
       //console.log("click");
     });
   },
+
   update: function (oldData) {
     const diff = AFRAME.utils.diff(oldData, this.data);
 

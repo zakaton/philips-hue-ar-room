@@ -85,6 +85,8 @@ AFRAME.registerSystem("philips-hue", {
     this.torchFlame = document.getElementById("torchFlame");
     this.torchFlamePosition = new THREE.Vector3();
 
+    this.lightNameEntity = document.getElementById("lightName");
+
     this.onModeUpdate();
     this.setupSocketConnection();
 
@@ -148,11 +150,18 @@ AFRAME.registerSystem("philips-hue", {
     }
   },
 
-  selectLight: function (_light) {
-    console.log(_light);
-    this.selectedLight = _light;
+  selectLight: function (light) {
+    console.log(light);
+    if (this.selectedLight) {
+      this.selectedLight.entity.setAttribute("philips-hue", "debug", false);
+    }
+    this.selectedLight = light;
     this.currentMenu = "light";
     this.onMenuUpdate();
+
+    // FILL
+    this.lightNameEntity.setAttribute("dynamic-text", "text", light.name);
+    this.selectedLight.entity.setAttribute("philips-hue", "debug", true);
   },
 
   onPersistentAnchor: function () {
@@ -165,10 +174,14 @@ AFRAME.registerSystem("philips-hue", {
 
   onUIClick: function (event) {
     const menu = event.target.closest("[data-ui-menu]").dataset.uiMenu;
-    const option =
-      event.target.closest("[dynamic-text]").components["dynamic-text"].data
-        .text;
-    this.onMenuUIClick(menu, option);
+    const closestDynamicText = event.target.closest("[dynamic-text]");
+    let option;
+    if (closestDynamicText) {
+      option = closestDynamicText.components["dynamic-text"].data.text;
+    }
+    if (menu && option) {
+      this.onMenuUIClick(menu, option);
+    }
   },
 
   onMenuUIClick: function (menu, option) {
@@ -336,13 +349,15 @@ AFRAME.registerSystem("philips-hue", {
 
         this.sceneContainer.appendChild(lightEntity);
         this.entities.push(lightEntity);
-        this.lights.push({ bridgeIndex, lightId, name });
+        this.lights.push({ bridgeIndex, lightId, name, entity: lightEntity });
       }
     });
 
     this.lightsPageIndex = 0;
     this.maxLightsPageIndex = Math.ceil(this.lights.length / 5) - 1;
     this.onLightsPageIndexUpdate();
+
+    this.selectLight(this.lights[0]);
   },
   onLightsPageIndexUpdate: function () {
     let shouldShowPreviousLightsEntity = false;
@@ -729,6 +744,7 @@ AFRAME.registerComponent("philips-hue", {
     bridge: { type: "number" },
     light: { type: "number" },
     name: { type: "string" },
+    debug: { type: "boolean", default: false },
   },
   threeLightToPhilipsHueColor: function (color, intensity) {
     color = color
@@ -765,10 +781,7 @@ AFRAME.registerComponent("philips-hue", {
     this.sphere.setAttribute("color", "red");
     this.sphere.setAttribute("material", "shader: flat; color: red");
     this.sphere.setAttribute("radius", "0.05");
-    this.sphere.setAttribute(
-      "visible",
-      this.system.data.debug ? "true" : "false"
-    );
+    this.onDebugUpdate();
     this.el.appendChild(this.sphere);
 
     this.el.appendChild(this.light);
@@ -795,5 +808,19 @@ AFRAME.registerComponent("philips-hue", {
   },
   remove: function () {
     //this.system.removeEntity(this);
+  },
+
+  update: function (oldData) {
+    const diff = AFRAME.utils.diff(oldData, this.data);
+
+    const diffKeys = Object.keys(diff);
+
+    if (diffKeys.includes("debug")) {
+      this.onDebugUpdate();
+    }
+  },
+
+  onDebugUpdate: function () {
+    this.sphere.setAttribute("visible", this.data.debug ? "true" : "false");
   },
 });

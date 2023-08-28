@@ -11,6 +11,7 @@
     <script src="/src/components/shadow-component.js"></script>
     <script src="/src/components/laser-controls-component.js"></script>
     <script src="/src/components/dynamic-text-component.js"></script>
+    <script src="/src/components/slider-component.js"></script>
     <script src="/src/socket.io.min.js"></script>
   </head>
   <body>
@@ -140,9 +141,10 @@
           <a-entity
             position="0 0.00 0"
             dynamic-text="text: name; scale: 2;"
-            data-name
+            id="lightName"
             data-not-raycastable
           ></a-entity>
+          <a-entity slider position="0 -0.08 0"></a-entity>
           <a-plane
             color="white"
             opacity="0.5"
