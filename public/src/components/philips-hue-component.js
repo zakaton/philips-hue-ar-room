@@ -633,7 +633,7 @@ AFRAME.registerSystem("philips-hue", {
     this.toggleDebugEntity.setAttribute(
       "dynamic-text",
       "text",
-      this.data.debug ? "D" : "d"
+      this.data.debug ? "hide" : "show"
     );
     this.entities.forEach((entity) => entity.philipsHue.onDebugUpdate());
   },
