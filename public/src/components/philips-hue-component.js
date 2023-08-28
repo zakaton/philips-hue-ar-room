@@ -727,7 +727,7 @@ AFRAME.registerComponent("philips-hue", {
     this.color = new THREE.Color();
     this._color = new THREE.Color();
     this.previousColor = new THREE.Color();
-    this.intensity = 1;
+    this.intensity = 0;
     this.philipsHueColor = null;
     this.light = document.createElement("a-light");
     this.light.setAttribute("type", "point");
