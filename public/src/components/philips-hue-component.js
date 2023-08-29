@@ -283,6 +283,9 @@ AFRAME.registerSystem("philips-hue", {
     this.selectedLight.entity.setAttribute("philips-hue", "debug", true);
 
     this.updateSliders();
+
+    this.data.debug = false;
+    this.onDebugUpdate();
   },
   deselectLight: function () {
     if (this.selectedLight) {
@@ -413,7 +416,7 @@ AFRAME.registerSystem("philips-hue", {
   showLightPositioning: function () {
     this.setHintText(`press "B" to set light position, or "A" to cancel`);
     this.isPositioningLight = true;
-    this.selectedLight.entity.setAttribute("philips-hue", "raycastable", true);
+    //this.selectedLight.entity.setAttribute("philips-hue", "raycastable", true);
     if (!this.selectedLight.position) {
       this.vec3.copy(this.uiEntity.object3D.position);
       this.sceneContainer.object3D.worldToLocal(this.vec3);
@@ -423,7 +426,7 @@ AFRAME.registerSystem("philips-hue", {
   },
   hideLightPositioning: function () {
     this.isPositioningLight = false;
-    this.selectedLight.entity.setAttribute("philips-hue", "raycastable", false);
+    //this.selectedLight.entity.setAttribute("philips-hue", "raycastable", false);
     const position = this.selectedLight.position || [0, 0, 0];
     this.selectedLight.entity.object3D.position.set(...position);
   },
@@ -537,6 +540,12 @@ AFRAME.registerSystem("philips-hue", {
           entity: lightEntity,
           position,
         };
+
+        lightEntity.addEventListener("mousedown", () => {
+          if (!this.isPositioningLight) {
+            this.selectLight(light);
+          }
+        });
 
         lightEntity._light = light;
 
@@ -738,7 +747,7 @@ AFRAME.registerSystem("philips-hue", {
       "text",
       this.data.debug ? "hide" : "show"
     );
-    this.entities.forEach((entity) => entity.philipsHue.onDebugUpdate());
+    this.entities.forEach((entity) => entity.philipsHue?.onDebugUpdate());
   },
 
   onGripChanged: function (event) {
@@ -1132,9 +1141,8 @@ AFRAME.registerComponent("philips-hue", {
   },
 
   onDebugUpdate: function () {
-    this.sphere.setAttribute(
-      "visible",
-      this.system.data.debug || this.data.debug ? "true" : "false"
-    );
+    const debug = this.system.data.debug || this.data.debug;
+    this.el.setAttribute("philips-hue", "raycastable", debug);
+    this.sphere.setAttribute("visible", debug);
   },
 });
