@@ -75,6 +75,10 @@ AFRAME.registerSystem("philips-hue", {
       "triggerdown",
       this.onRightTriggerDown.bind(this)
     );
+    this.controllers.right.addEventListener(
+      "triggerup",
+      this.onRightTriggerUp.bind(this)
+    );
 
     this.flashlight = document.getElementById("flashlight");
     this.flashlightPosition = new THREE.Vector3();
@@ -392,15 +396,28 @@ AFRAME.registerSystem("philips-hue", {
   showLightPositioning: function () {
     this.setHintText(`press "B" to set light position, or "A" to cancel`);
     this.isPositioningLight = true;
-    // FILL - if light has no position, put in front of user
+    this.selectedLight.entity.setAttribute("philips-hue", "raycastable", true);
+    if (!this.selectedLight.position) {
+      // FILL 1 - if light has no position, put in front of user
+      this.vec3 = this.vec3 || new THREE.Vector3();
+
+      this.vec3.copy(this.uiEntity.object3D.position);
+      this.sceneContainer.object3D.worldToLocal(this.vec3);
+
+      this.selectedLight.entity.object3D.position.copy(this.vec3);
+    }
   },
   hideLightPositioning: function () {
     this.isPositioningLight = false;
+    this.selectedLight.entity.setAttribute("philips-hue", "raycastable", false);
+    const position = this.selectedLight.position || [0, 0, 0];
+    this.selectedLight.entity.object3D.position.set(...position);
   },
   positioningLightTick: function () {
-    if (this.selectedLight) {
-      console.log("TICK");
-      // FILL - update hue entity if sphere is selected, using fixed transform relative to controller
+    if (this.selectedLight && this.isGrabbingLight) {
+      const { entity } = this.selectedLight;
+      // FILL 2 - update entity position
+      console.log("MOVE!");
     }
   },
 
@@ -484,20 +501,27 @@ AFRAME.registerSystem("philips-hue", {
     this.bridges.forEach((bridge, bridgeIndex) => {
       const { group, lights } = bridge;
       for (const lightId in group.lights) {
-        const { name, position } = lights[lightId];
+        let { name, position } = lights[lightId];
         const lightEntity = document.createElement("a-entity");
         lightEntity.id = `${bridgeIndex}-${lightId}-${name}`;
         lightEntity.setAttribute(
           "philips-hue",
           `bridge: ${bridgeIndex}; light: ${lightId}; name: ${name}`
         );
+
         if (position) {
           lightEntity.setAttribute("position", position.join(" "));
         }
 
         this.sceneContainer.appendChild(lightEntity);
         this.entities.push(lightEntity);
-        this.lights.push({ bridgeIndex, lightId, name, entity: lightEntity });
+        this.lights.push({
+          bridgeIndex,
+          lightId,
+          name,
+          entity: lightEntity,
+          position,
+        });
       }
     });
 
@@ -586,7 +610,7 @@ AFRAME.registerSystem("philips-hue", {
 
   positionLight: function () {
     if (this.selectedLight) {
-      // FILL
+      // FILL 3
       // send message to update position
     }
   },
@@ -619,6 +643,16 @@ AFRAME.registerSystem("philips-hue", {
   },
   onRightTriggerDown: function () {
     console.log("right trigger down");
+    if (
+      this.isPositioningLight &&
+      this.selectedLight?.entity.philipsHue?.isHighlighted
+    ) {
+      this.isGrabbingLight = true;
+    }
+  },
+  onRightTriggerUp: function () {
+    console.log("right trigger up");
+    this.isGrabbingLight = false;
   },
 
   update: function (oldData) {
@@ -922,6 +956,7 @@ AFRAME.registerComponent("philips-hue", {
     light: { type: "number" },
     name: { type: "string" },
     debug: { type: "boolean", default: false },
+    raycastable: { type: "boolean", default: false },
   },
   threeLightToPhilipsHueColor: function (color, intensity) {
     color = color
@@ -956,9 +991,18 @@ AFRAME.registerComponent("philips-hue", {
     }
 
     this.sphere = document.createElement("a-sphere");
+
     this.sphere.setAttribute("color", "red");
     this.sphere.setAttribute("material", "shader: flat; color: red");
     this.sphere.setAttribute("radius", "0.05");
+    this.sphere.addEventListener("mouseenter", () => {
+      this.sphere.setAttribute("color", "green");
+      this.isHighlighted = true;
+    });
+    this.sphere.addEventListener("mouseleave", () => {
+      this.sphere.setAttribute("color", "red");
+      this.isHighlighted = false;
+    });
     this.onDebugUpdate();
     this.el.appendChild(this.sphere);
 
@@ -993,8 +1037,25 @@ AFRAME.registerComponent("philips-hue", {
 
     const diffKeys = Object.keys(diff);
 
-    if (diffKeys.includes("debug")) {
-      this.onDebugUpdate();
+    diffKeys.forEach((key) => {
+      switch (key) {
+        case "debug":
+          this.onDebugUpdate();
+          break;
+        case "raycastable":
+          this.updateRaycastable();
+          break;
+      }
+    });
+  },
+
+  updateRaycastable: function () {
+    if (this.data.raycastable) {
+      this.sphere.classList.add("raycastable");
+    } else {
+      this.sphere.classList.remove("raycastable");
+      this.sphere.setAttribute("color", "red");
+      this.isHighlighted = false;
     }
   },
 
