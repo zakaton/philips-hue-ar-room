@@ -26,6 +26,7 @@ AFRAME.registerSystem("philips-hue", {
     torchDistanceThreshold: { type: "vec2", default: [0.1, 1.1] },
     torchHueRange: { type: "vec2", default: [0.08, 0.15] },
     gazeDistanceThreshold: { type: "vec2", default: [0.1, 8] },
+    flatten: { type: "boolean", default: true },
   },
 
   init: function () {
@@ -529,15 +530,19 @@ AFRAME.registerSystem("philips-hue", {
           lightEntity.setAttribute("position", position.join(" "));
         }
 
-        this.sceneContainer.appendChild(lightEntity);
-        this.entities.push(lightEntity);
-        this.lights.push({
+        const light = {
           bridgeIndex,
           lightId,
           name,
           entity: lightEntity,
           position,
-        });
+        };
+
+        lightEntity._light = light;
+
+        this.sceneContainer.appendChild(lightEntity);
+        this.entities.push(lightEntity);
+        this.lights.push(light);
       }
     });
 
@@ -788,6 +793,10 @@ AFRAME.registerSystem("philips-hue", {
         const { philipsHue } = entity;
         entity.object3D.getWorldPosition(position);
 
+        if (!entity._light.position) {
+          return;
+        }
+
         if (philipsHue && philipsHue.light.hasLoaded) {
           const { bridge: bridgeIndex, light: lightIndex } = philipsHue.data;
           let { intensity } = philipsHue;
@@ -827,6 +836,10 @@ AFRAME.registerSystem("philips-hue", {
             case "gaze":
               {
                 vector.subVectors(position, this.camera.object3D.position);
+                if (this.data.flatten) {
+                  vector.y = 0;
+                  cameraForwardPosition.y = 0;
+                }
                 const distance = vector.length();
                 const angle = cameraForwardPosition.angleTo(vector);
 
@@ -879,6 +892,10 @@ AFRAME.registerSystem("philips-hue", {
             case "flashlight":
               {
                 vector.subVectors(position, this.flashlightPosition);
+                if (this.data.flatten) {
+                  vector.y = 0;
+                  this.flashlightForwardPosition.y = 0;
+                }
                 const distance = vector.length();
                 const angle = this.flashlightForwardPosition.angleTo(vector);
 
