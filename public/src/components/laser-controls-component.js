@@ -36,7 +36,7 @@ AFRAME.registerComponent("laser-controls-new", {
       self.modelReady = true;
     });
 
-    var far = 2;
+    var far = 5;
 
     let didFlip = false;
     function createRay(evt) {

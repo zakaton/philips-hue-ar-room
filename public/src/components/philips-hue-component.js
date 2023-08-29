@@ -157,7 +157,7 @@ AFRAME.registerSystem("philips-hue", {
     this.sceneEl.addEventListener("enter-vr", this.onEnterVR.bind(this));
     this.sceneEl.addEventListener("exit-vr", this.onExitVR.bind(this));
 
-    this.currentMenu = "lights";
+    this.currentMenu = "main";
     this.uiMenuEntities = {};
     this.uiEntity.querySelectorAll("[data-ui-menu]").forEach((uiMenuEntity) => {
       this.uiMenuEntities[uiMenuEntity.dataset.uiMenu] = uiMenuEntity;
@@ -271,7 +271,10 @@ AFRAME.registerSystem("philips-hue", {
   },
 
   selectLight: function (light) {
-    console.log(light);
+    if (this.selectedLight == light) {
+      return;
+    }
+    console.log("select light", light);
     if (this.selectedLight) {
       this.deselectLight();
     }
@@ -426,9 +429,11 @@ AFRAME.registerSystem("philips-hue", {
   },
   hideLightPositioning: function () {
     this.isPositioningLight = false;
-    //this.selectedLight.entity.setAttribute("philips-hue", "raycastable", false);
-    const position = this.selectedLight.position || [0, 0, 0];
-    this.selectedLight.entity.object3D.position.set(...position);
+    if (this.selectedLight) {
+      //this.selectedLight.entity.setAttribute("philips-hue", "raycastable", false);
+      const position = this.selectedLight.position || [0, 0, 0];
+      this.selectedLight.entity.object3D.position.set(...position);
+    }
   },
   positioningLightTick: function () {
     if (this.selectedLight && this.isGrabbingLight) {
@@ -559,7 +564,7 @@ AFRAME.registerSystem("philips-hue", {
     this.maxLightsPageIndex = Math.ceil(this.lights.length / 5) - 1;
     this.onLightsPageIndexUpdate();
 
-    this.selectLight(this.lights[0]);
+    //this.selectLight(this.lights[0]);
   },
   onLightsPageIndexUpdate: function () {
     let shouldShowPreviousLightsEntity = false;
