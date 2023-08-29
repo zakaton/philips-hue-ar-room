@@ -46,6 +46,16 @@ AFRAME.registerSystem("philips-hue", {
       left: document.getElementById("leftHandControls"),
       right: document.getElementById("rightHandControls"),
     };
+    this.grabEntities = {};
+    for (const side in this.controllers) {
+      const grabEntity = document.createElement("a-sphere");
+      grabEntity.setAttribute("visible", "false");
+      grabEntity.setAttribute("radius", "0.01");
+      grabEntity.setAttribute("color", "yellow");
+      grabEntity.setAttribute("material", "shader: flat;");
+      this.grabEntities[side] = grabEntity;
+      this.controllers[side].appendChild(grabEntity);
+    }
     this.controllers.right.addEventListener(
       "abuttondown",
       this.onAButtonDown.bind(this)
@@ -57,6 +67,10 @@ AFRAME.registerSystem("philips-hue", {
     this.controllers.left.addEventListener(
       "triggerdown",
       this.onLeftTriggerDown.bind(this)
+    );
+    this.controllers.left.addEventListener(
+      "triggerup",
+      this.onLeftTriggerUp.bind(this)
     );
 
     this.controllers.right.addEventListener(
@@ -117,6 +131,8 @@ AFRAME.registerSystem("philips-hue", {
       "sliderValue",
       this.onSliderValue.bind(this)
     );
+
+    this.vec3 = new THREE.Vector3();
 
     this.onModeUpdate();
     this.setupSocketConnection();
@@ -398,9 +414,6 @@ AFRAME.registerSystem("philips-hue", {
     this.isPositioningLight = true;
     this.selectedLight.entity.setAttribute("philips-hue", "raycastable", true);
     if (!this.selectedLight.position) {
-      // FILL 1 - if light has no position, put in front of user
-      this.vec3 = this.vec3 || new THREE.Vector3();
-
       this.vec3.copy(this.uiEntity.object3D.position);
       this.sceneContainer.object3D.worldToLocal(this.vec3);
 
@@ -416,8 +429,11 @@ AFRAME.registerSystem("philips-hue", {
   positioningLightTick: function () {
     if (this.selectedLight && this.isGrabbingLight) {
       const { entity } = this.selectedLight;
-      // FILL 2 - update entity position
-      console.log("MOVE!");
+      this.pvec3 = this.pvec3 || new THREE.Vector3();
+      const grabEntity = this.grabEntities[this.grabbingSide];
+      grabEntity.object3D.getWorldPosition(this.pvec3);
+      entity.parentEl.object3D.worldToLocal(this.pvec3);
+      entity.object3D.position.copy(this.pvec3);
     }
   },
 
@@ -610,8 +626,19 @@ AFRAME.registerSystem("philips-hue", {
 
   positionLight: function () {
     if (this.selectedLight) {
-      // FILL 3
-      // send message to update position
+      const position = this.selectedLight.entity.object3D.position.toArray();
+      const light = this.selectedLight;
+      light.position = position;
+
+      this.sendSocketMessage("setLights", {
+        lights: [
+          {
+            bridgeId: light.bridgeIndex,
+            lightId: light.lightId,
+            position,
+          },
+        ],
+      });
     }
   },
 
@@ -634,6 +661,19 @@ AFRAME.registerSystem("philips-hue", {
   },
   onLeftTriggerDown: function () {
     console.log("left trigger down");
+    if (
+      this.isPositioningLight &&
+      this.selectedLight?.entity.philipsHue?.isHighlighted
+    ) {
+      this.isGrabbingLight = true;
+      this.updateGrabEntity("left");
+    }
+  },
+  onLeftTriggerUp: function () {
+    console.log("left trigger up");
+    if (this.isGrabbingLight && this.grabbingSide == "left") {
+      this.isGrabbingLight = false;
+    }
   },
   onXButtonDown: function () {
     console.log("X");
@@ -648,11 +688,26 @@ AFRAME.registerSystem("philips-hue", {
       this.selectedLight?.entity.philipsHue?.isHighlighted
     ) {
       this.isGrabbingLight = true;
+      this.updateGrabEntity("right");
     }
   },
   onRightTriggerUp: function () {
     console.log("right trigger up");
     this.isGrabbingLight = false;
+    if (this.isGrabbingLight && this.grabbingSide == "right") {
+      this.isGrabbingLight = false;
+    }
+  },
+
+  updateGrabEntity: function (side) {
+    this.grabbingSide = side;
+    const grabEntity = this.grabEntities[this.grabbingSide];
+
+    this.gvec3 = this.gvec3 || new THREE.Vector3();
+
+    this.selectedLight.entity.object3D.getWorldPosition(this.gvec3);
+    grabEntity.parentEl.object3D.worldToLocal(this.gvec3);
+    grabEntity.object3D.position.copy(this.gvec3);
   },
 
   update: function (oldData) {

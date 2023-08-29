@@ -275,13 +275,13 @@ io.on("connection", (socket) => {
         }
       }
 
-      const bridge = bridges.find((bridge) => bridge.id == bridgeId);
+      const bridge = bridges[bridgeId];
       if (bridge && position) {
         console.log(
           `setting ${bridgeId}:${lightId} position to ${position}...`
         );
         bridge.lights[lightId].position = position;
-        philipsHueBridgesInformation[bridgeId].lights[lightId].position =
+        philipsHueBridgesInformation[bridge.id].lights[lightId].position =
           position;
         didUpdatePosition = true;
       }
