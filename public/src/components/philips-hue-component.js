@@ -190,6 +190,7 @@ AFRAME.registerSystem("philips-hue", {
         case this.brightnessSliderEntity:
           //console.log("brightness", value);
           philipsHue.intensity = value;
+          this.updateToggleLightEntity();
           break;
         case this.saturationSliderEntity:
           //console.log("saturation", value);
@@ -209,6 +210,14 @@ AFRAME.registerSystem("philips-hue", {
       const { entity } = this.selectedLight;
       const { philipsHue } = entity;
       philipsHue.intensity = philipsHue.intensity ? 0 : 1;
+      this.updateToggleLightEntity();
+      this.updateSliders();
+    }
+  },
+  updateToggleLightEntity: function () {
+    if (this.selectedLight) {
+      const { entity } = this.selectedLight;
+      const { philipsHue } = entity;
       this.toggleLightEntity.setAttribute(
         "dynamic-text",
         "text",
@@ -381,7 +390,7 @@ AFRAME.registerSystem("philips-hue", {
   },
 
   showLightPositioning: function () {
-    this.setHintText(`press "B" to set light position`);
+    this.setHintText(`press "B" to set light position, or "A" to cancel`);
     this.isPositioningLight = true;
     // FILL - if light has no position, put in front of user
   },
