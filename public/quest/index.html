@@ -12,6 +12,7 @@
     <script src="/src/components/laser-controls-component.js"></script>
     <script src="/src/components/dynamic-text-component.js"></script>
     <script src="/src/components/slider-component.js"></script>
+    <script src="/src/components/unlit-component.js"></script>
     <script src="/src/socket.io.min.js"></script>
   </head>
   <body>
@@ -57,6 +58,7 @@
             width="0.3"
             height="0.3"
             position="0 0 -0.001"
+            material="shader: flat;"
           ></a-plane>
         </a-entity>
 
@@ -75,6 +77,7 @@
             width="0.3"
             height="0.2"
             position="0 0 -0.001"
+            material="shader: flat;"
           ></a-plane>
         </a-entity>
 
@@ -135,6 +138,7 @@
             width="0.5"
             height="0.6"
             position="0 0 -0.001"
+            material="shader: flat;"
           ></a-plane>
         </a-entity>
 
@@ -188,6 +192,7 @@
             width="0.5"
             height="0.8"
             position="0 0 -0.001"
+            material="shader: flat;"
           ></a-plane>
         </a-entity>
 
@@ -222,6 +227,7 @@
             width="0.3"
             height="0.6"
             position="0 0 -0.001"
+            material="shader: flat;"
           ></a-plane>
         </a-entity>
       </a-entity>
@@ -230,6 +236,7 @@
         <a-box scale="0.01 0.01 0.01" color="red" visible="false"></a-box>
         <a-entity position="0 -0.2 -0.1">
           <a-entity
+            unlit
             gltf-model="#anchorModel"
             scale="0.020 0.020 0.020"
             position="0 0.119 0"
@@ -248,7 +255,7 @@
         <a-entity id="hud" position="0 0 -0.4">
           <a-entity dynamic-text id="hintText" position="0 0.12 0"></a-entity>
         </a-entity>
-        <a-entity id="cameraForward" position="0 0 -0.5"></a-entity>
+        <a-entity id="cameraForward" position="0 0 -0.6"></a-entity>
       </a-camera>
 
       <a-entity
@@ -307,6 +314,7 @@
         <a-entity position="0 -0.2 -0.1" id="handAnchor" visible="false">
           <a-entity
             gltf-model="#anchorModel"
+            unlit
             scale="0.020 0.020 0.020"
             position="0 0.119 0"
             rotation="0 0 0"
@@ -319,6 +327,7 @@
           <a-entity position="0 -0.2 -0.1">
             <a-entity
               gltf-model="#anchorModel"
+              unlit
               scale="0.020 0.020 0.020"
               position="0 0.119 0"
               rotation="0 0 0"

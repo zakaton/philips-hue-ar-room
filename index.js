@@ -37,6 +37,10 @@ async function getPhilipsHueBridgesInformation() {
 }
 async function _savePhilipsHueBridgesInformation() {
   try {
+    console.log(
+      "save philipsHueBridgesInformation",
+      philipsHueBridgesInformation
+    );
     await fs.promises.writeFile(
       "philips-hue-bridges-information.json",
       JSON.stringify(philipsHueBridgesInformation, null, 2),
@@ -114,7 +118,7 @@ async function onBridgeCredentials(bridge) {
 async function onBridgeConnection(bridge) {
   await getBridgeGroup(bridge);
   await getBridgeLights(bridge);
-  //await startBridge(bridge);
+  await startBridge(bridge);
 }
 
 async function getBridgeLights(bridge, overwrite = false) {
@@ -127,7 +131,13 @@ async function getBridgeLights(bridge, overwrite = false) {
     bridge.lights = {};
     for (const lightId in lights) {
       const { name } = lights[lightId];
-      bridge.lights[lightId] = { name };
+      const light = { name };
+      const _light = bridgeInformation.lights[lightId];
+      if (_light) {
+        const { position } = _light;
+        light.position = position;
+      }
+      bridge.lights[lightId] = light;
     }
     bridgeInformation.lights = bridge.lights;
     await savePhilipsHueBridgesInformation();
@@ -267,23 +277,26 @@ io.on("connection", (socket) => {
 
     let didUpdatePosition = false;
     lights.forEach(({ bridgeId, lightId, color, position }) => {
-      if (color) {
-        const _bridge = _bridges[bridgeId];
-        if (_bridge) {
-          console.log(`setting ${bridgeId}:${lightId} light to ${color}...`);
-          _bridge.transition(lightId, color);
-        }
-      }
-
       const bridge = bridges[bridgeId];
-      if (bridge && position) {
-        console.log(
-          `setting ${bridgeId}:${lightId} position to ${position}...`
-        );
-        bridge.lights[lightId].position = position;
-        philipsHueBridgesInformation[bridge.id].lights[lightId].position =
-          position;
-        didUpdatePosition = true;
+
+      if (bridge) {
+        if (color) {
+          const _bridge = _bridges[bridge.id];
+          if (_bridge) {
+            console.log(`setting ${bridgeId}:${lightId} light to ${color}...`);
+            _bridge.transition(lightId, color);
+          }
+        }
+
+        if (position) {
+          console.log(
+            `setting ${bridgeId}:${lightId} position to ${position}...`
+          );
+          bridge.lights[lightId].position = position;
+          philipsHueBridgesInformation[bridge.id].lights[lightId].position =
+            position;
+          didUpdatePosition = true;
+        }
       }
     });
     if (didUpdatePosition) {

@@ -810,7 +810,7 @@ AFRAME.registerSystem("philips-hue", {
         const { philipsHue } = entity;
         entity.object3D.getWorldPosition(position);
 
-        if (!entity._light.position) {
+        if (!entity._light.position && this.selectedLight != entity._light) {
           return;
         }
 
@@ -979,13 +979,14 @@ AFRAME.registerSystem("philips-hue", {
             console.log(`new color for "${entity.id}"`, newPhilipsHueColor);
             lights.push({
               color: newPhilipsHueColor,
-              bridge: bridgeIndex,
-              light: lightIndex,
+              bridgeId: bridgeIndex,
+              lightId: lightIndex,
             });
           }
         }
       });
       if (lights.length > 0) {
+        console.log("setLights", lights);
         this.sendSocketMessage("setLights", { lights });
       }
     }
@@ -1084,6 +1085,7 @@ AFRAME.registerComponent("philips-hue", {
     this.sphere.setAttribute("color", "red");
     this.sphere.setAttribute("material", "shader: flat; color: red");
     this.sphere.setAttribute("radius", "0.05");
+    this.sphere.setAttribute("opacity", "0.7");
     this.sphere.addEventListener("mouseenter", () => {
       this.sphere.setAttribute("color", "green");
       this.isHighlighted = true;
