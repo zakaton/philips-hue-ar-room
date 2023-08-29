@@ -432,7 +432,9 @@ AFRAME.registerSystem("philips-hue", {
     if (this.selectedLight) {
       //this.selectedLight.entity.setAttribute("philips-hue", "raycastable", false);
       const position = this.selectedLight.position || [0, 0, 0];
+      console.log("setting...", position);
       this.selectedLight.entity.object3D.position.set(...position);
+      console.log(this.selectedLight.entity.object3D.position);
     }
   },
   positioningLightTick: function () {
@@ -518,6 +520,7 @@ AFRAME.registerSystem("philips-hue", {
   onSocketConnection: function () {},
   onSocketDisconnection: function () {},
   onBridges: function (bridges) {
+    this.deselectLight();
     this.entities.forEach((entity) => entity.remove());
     this.entities.length = 0;
 
@@ -674,7 +677,7 @@ AFRAME.registerSystem("philips-hue", {
     }
     if (this.isPositioningLight) {
       this.positionLight();
-      this.hideLightPositioning();
+      //this.hideLightPositioning();
       this.showUI();
     }
   },

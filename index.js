@@ -270,14 +270,16 @@ io.on("connection", (socket) => {
       if (color) {
         const _bridge = _bridges[bridgeId];
         if (_bridge) {
-          //console.log(`setting ${bridgeId}:${lightId} light to ${color}...`);
+          console.log(`setting ${bridgeId}:${lightId} light to ${color}...`);
           _bridge.transition(lightId, color);
         }
       }
 
       const bridge = bridges[bridgeId];
       if (bridge && position) {
-        //console.log(`setting ${bridgeId}:${lightId} position to ${position}...`);
+        console.log(
+          `setting ${bridgeId}:${lightId} position to ${position}...`
+        );
         bridge.lights[lightId].position = position;
         philipsHueBridgesInformation[bridge.id].lights[lightId].position =
           position;
@@ -286,7 +288,7 @@ io.on("connection", (socket) => {
     });
     if (didUpdatePosition) {
       await savePhilipsHueBridgesInformation();
-      socket.emit("bridges", bridges);
+      //socket.emit("bridges", bridges);
     }
   });
 
