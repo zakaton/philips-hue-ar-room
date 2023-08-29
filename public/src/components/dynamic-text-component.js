@@ -97,32 +97,38 @@ AFRAME.registerComponent("dynamic-text", {
     this.updateTextSize();
   },
   updateTextSize: function () {
-    if (!this.waitedToLoad) {
-      setTimeout(() => {
-        this.waitedToLoad = true;
-        this.updateTextSize();
-      }, 1000);
-      return;
-    }
-
+    const { hasLoaded } = this.el;
     if (this.el.hasLoaded) {
-      setTimeout(() => {
-        const { textSize, planeEntity, textEntity } = this;
+      const { textSize, planeEntity, textEntity } = this;
+      let text = textEntity.components["text"];
 
-        let text = textEntity.components["text"];
-        text.geometry.computeBoundingBox();
-        const { boundingBox } = text.geometry;
-        boundingBox.getSize(textSize);
+      if (!text?.initialized || !text.geometry) {
+        setTimeout(() => {
+          this.updateTextSize();
+        }, 10);
+        return;
+      } else {
+        setTimeout(() => {
+          try {
+            text.geometry.computeBoundingBox();
+            const { boundingBox } = text.geometry;
+            boundingBox.getSize(textSize);
 
-        const width = textSize.x / 1500;
-        const height = textSize.y / 1500;
-        planeEntity.setAttribute("width", width);
-        planeEntity.setAttribute("height", height);
-        if (text.data.baseline !== "center") {
-          planeEntity.object3D.position.y =
-            ((text.data.baseline == "top" ? -1 : 1) * height) / 2;
-        }
-      }, 0);
+            const width = textSize.x / 1500;
+            const height = textSize.y / 1500;
+            planeEntity.setAttribute("width", width);
+            planeEntity.setAttribute("height", height);
+            if (text.data.baseline !== "center") {
+              planeEntity.object3D.position.y =
+                ((text.data.baseline == "top" ? -1 : 1) * height) / 2;
+            }
+          } catch (error) {
+            setTimeout(() => {
+              this.updateTextSize();
+            }, 10);
+          }
+        }, 0);
+      }
     } else {
       this.el.addEventListener("loaded", () => {
         this.updateTextSize();
