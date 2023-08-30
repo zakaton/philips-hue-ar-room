@@ -132,7 +132,7 @@ async function getBridgeLights(bridge, overwrite = false) {
     for (const lightId in lights) {
       const { name } = lights[lightId];
       const light = { name };
-      const _light = bridgeInformation.lights[lightId];
+      const _light = bridgeInformation?.lights?.[lightId];
       if (_light) {
         const { position } = _light;
         light.position = position;
