@@ -107,4 +107,4 @@ dist
 .DS_Store
 *.txt
 philips-hue-bridges-information.json
-sec
+sec/*.pem
