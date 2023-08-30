@@ -1,5 +1,8 @@
 # philips-hue-ar-room
 
+[Video](https://youtu.be/qkAcXrHKRoc)
+[video tutorial](https://youtu.be/8_pULl4RjWY)
+
 On macOS:  
 for the security stuff, run the command in the terminal:  
 `sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./sec/key.pem -out ./sec/cert.pem`
