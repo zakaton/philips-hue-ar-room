@@ -47,6 +47,10 @@ AFRAME.registerSystem("philips-hue", {
       left: document.getElementById("leftHandControls"),
       right: document.getElementById("rightHandControls"),
     };
+    this.laserControls = {
+      left: document.getElementById("leftHandLaserControls"),
+      right: document.getElementById("rightHandLaserControls"),
+    };
     this.grabEntities = {};
     for (const side in this.controllers) {
       const grabEntity = document.createElement("a-sphere");
@@ -624,6 +628,7 @@ AFRAME.registerSystem("philips-hue", {
     let shouldShowFlashlight = false;
     let shouldShowTorch = false;
     let shouldShowMode = true;
+    let shouldShowLasers = false;
     switch (this.data.mode) {
       case "flashlight":
         shouldShowFlashlight = true;
@@ -633,6 +638,7 @@ AFRAME.registerSystem("philips-hue", {
         break;
       case "none":
         shouldShowMode = false;
+        shouldShowLasers = true;
         break;
       default:
         break;
@@ -642,6 +648,15 @@ AFRAME.registerSystem("philips-hue", {
     } else {
       this.setHintText("");
     }
+    /*
+    for (const side in this.laserControls) {
+      this.laserControls[side].setAttribute(
+        "raycaster",
+        "showLine",
+        shouldShowLasers
+      );
+    }
+    */
     this.flashlight.setAttribute("visible", shouldShowFlashlight);
     this.torch.setAttribute("visible", shouldShowTorch);
   },
