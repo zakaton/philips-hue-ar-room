@@ -648,15 +648,6 @@ AFRAME.registerSystem("philips-hue", {
     } else {
       this.setHintText("");
     }
-    /*
-    for (const side in this.laserControls) {
-      this.laserControls[side].setAttribute(
-        "raycaster",
-        "showLine",
-        shouldShowLasers
-      );
-    }
-    */
     this.flashlight.setAttribute("visible", shouldShowFlashlight);
     this.torch.setAttribute("visible", shouldShowTorch);
   },
@@ -1048,10 +1039,22 @@ AFRAME.registerSystem("philips-hue", {
     this.onMenuUpdate();
     this.hideAnchor();
     this.hideLightPositioning();
+
+    for (const side in this.laserControls) {
+      this.laserControls[side].setAttribute("raycaster", "showLine", true);
+    }
   },
   hideUI: function () {
     this.uiEntity.object3D.visible = false;
     this.onMenuUpdate();
+
+    for (const side in this.laserControls) {
+      this.laserControls[side].setAttribute(
+        "raycaster",
+        "showLine",
+        this.isPositioningLight
+      );
+    }
   },
 });
 
