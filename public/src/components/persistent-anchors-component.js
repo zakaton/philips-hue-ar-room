@@ -32,7 +32,11 @@ AFRAME.registerSystem("persistent-anchors", {
         this.checkedAnchors = true;
         if (this.session.persistentAnchors) {
           let anchors = this.session.persistentAnchors;
-          console.log("known anchor:");
+          if (anchors.length) {
+            console.log("known anchor:");
+          } else {
+            console.log("no known anchors");
+          }
           for (let i = 0; i < anchors.length; i++) {
             console.log(i + ": " + anchors[i]);
             try {
@@ -164,5 +168,6 @@ AFRAME.registerSystem("persistent-anchors", {
   addAnchoredObjectToScene: function (anchor) {
     this.anchor = anchor;
     this._updateTransformFlag = true;
+    this.sceneEl.emit("persistent-anchor");
   },
 });

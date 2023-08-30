@@ -1,0 +1,340 @@
+<html>
+  <head>
+    <title>Philips Hue AR (Quest)</title>
+    <script crossorigin="anonymous" src="/src/aframe.min.js"></script>
+    <script src="/src/components/persistent-anchors-component.js"></script>
+    <script src="/src/components/camera-controls-component.js"></script>
+    <script src="/src/components/philips-hue-component.js"></script>
+    <script src="/src/components/detected-planes-component.js"></script>
+    <!-- https://github.com/gftruj/aframe-hand-tracking-controls-extras -->
+    <script src="/src/components/hand-tracking-controls-extras.js"></script>
+    <script src="/src/components/shadow-component.js"></script>
+    <script src="/src/components/laser-controls-component.js"></script>
+    <script src="/src/components/dynamic-text-component.js"></script>
+    <script src="/src/components/slider-component.js"></script>
+    <script src="/src/components/unlit-component.js"></script>
+    <script src="/src/socket.io.min.js"></script>
+  </head>
+  <body>
+    <a-scene
+      shadow="type: pcfsoft"
+      renderer="colorManagement:true; toneMapping:ACESFilmic;"
+      persistent-anchors="target: #sceneContainer; targetAnchor: #internalAnchor;"
+      webxr="optionalFeatures: anchors; requiredFeatures: plane-detection,local-floor;"
+      detected-planes
+    >
+      <a-assets>
+        <a-asset-item id="anchorModel" src="/assets/anchor.glb"></a-asset-item>
+        <a-asset-item
+          id="flashlightModel"
+          src="/assets/flashlight.glb"
+        ></a-asset-item>
+        <a-asset-item id="torchModel" src="/assets/torch.glb"></a-asset-item>
+      </a-assets>
+
+      <a-sky hide-on-enter-ar color="powderblue"></a-sky>
+
+      <a-entity id="ui" visible="false">
+        <a-entity data-ui-menu="main">
+          <a-entity
+            position="0 0.08 0"
+            dynamic-text="text: anchor; scale: 2;"
+          ></a-entity>
+          <a-entity
+            position="0 0 0"
+            dynamic-text="text: lights; scale: 2;"
+            visible="false"
+            data-requires-anchor
+          ></a-entity>
+          <a-entity
+            position="0 -0.08 0"
+            dynamic-text="text: demos; scale: 2;"
+            visible="false"
+            data-requires-anchor
+          ></a-entity>
+          <a-plane
+            color="white"
+            opacity="0.5"
+            width="0.3"
+            height="0.3"
+            position="0 0 -0.001"
+            material="shader: flat;"
+          ></a-plane>
+        </a-entity>
+
+        <a-entity data-ui-menu="anchor">
+          <a-entity
+            position="0 0.04 0"
+            dynamic-text="text: back; scale: 2;"
+          ></a-entity>
+          <a-entity
+            position="0 -0.04 0"
+            dynamic-text="text: set anchor; scale: 2;"
+          ></a-entity>
+          <a-plane
+            color="white"
+            opacity="0.5"
+            width="0.3"
+            height="0.2"
+            position="0 0 -0.001"
+            material="shader: flat;"
+          ></a-plane>
+        </a-entity>
+
+        <a-entity data-ui-menu="lights">
+          <a-entity
+            position="0.1 0.24 0"
+            dynamic-text="text: show; scale: 2;"
+            id="toggleDebug"
+          ></a-entity>
+          <a-entity
+            position="-0.1 0.24 0"
+            dynamic-text="text: back; scale: 2;"
+          ></a-entity>
+          <a-entity
+            position="0 0.16 0"
+            dynamic-text="text: light A; scale: 2;"
+            data-light
+          ></a-entity>
+          <a-entity
+            position="0 0.08 0"
+            dynamic-text="text: light B; scale: 2;"
+            data-light
+          ></a-entity>
+          <a-entity
+            position="0 0 0"
+            dynamic-text="text: light C; scale: 2;"
+            data-light
+          ></a-entity>
+          <a-entity
+            position="0 -0.08 0"
+            dynamic-text="text: light D; scale: 2;"
+            data-light
+          ></a-entity>
+          <a-entity
+            position="0 -0.16 0"
+            dynamic-text="text: light E; scale: 2;"
+            data-light
+          ></a-entity>
+          <a-entity
+            position="-0.15 -0.24 0"
+            dynamic-text="text: <; scale: 3;"
+            id="previousLights"
+          ></a-entity>
+          <a-entity
+            position="0 -0.24 0"
+            data-not-raycastable
+            dynamic-text="text: 0/0; scale: 2;"
+            id="lightsPageIndex"
+          ></a-entity>
+          <a-entity
+            position="0.15 -0.24 0"
+            dynamic-text="text: >; scale: 3;"
+            id="nextLights"
+          ></a-entity>
+          <a-plane
+            color="white"
+            opacity="0.5"
+            width="0.5"
+            height="0.6"
+            position="0 0 -0.001"
+            material="shader: flat;"
+          ></a-plane>
+        </a-entity>
+
+        <a-entity data-ui-menu="light">
+          <a-entity
+            position="0 0.32 0"
+            dynamic-text="text: back; scale: 2;"
+          ></a-entity>
+          <a-entity
+            position="0 0.24 0"
+            dynamic-text="text: name; scale: 2;"
+            id="lightName"
+            data-not-raycastable
+          ></a-entity>
+          <a-entity
+            position="0 0.16 0"
+            dynamic-text="text: on; scale: 2;"
+            id="toggleLight"
+          ></a-entity>
+          <a-entity
+            position="0 0.08 0"
+            dynamic-text="text: brightness; scale: 2;"
+            data-not-raycastable
+          ></a-entity>
+          <a-entity id="brightnessSlider" slider position="0 0.02 0"></a-entity>
+          <a-entity
+            position="0 -0.06 0"
+            dynamic-text="text: hue; scale: 2;"
+            data-not-raycastable
+          ></a-entity>
+          <a-entity id="hueSlider" slider position="0 -0.11 0"></a-entity>
+          <a-entity
+            position="0 -0.19 0"
+            dynamic-text="text: saturation; scale: 2;"
+            data-not-raycastable
+          ></a-entity>
+          <a-entity
+            id="saturationSlider"
+            slider
+            position="0 -0.24 0"
+          ></a-entity>
+
+          <a-entity
+            position="0 -0.33 0"
+            dynamic-text="text: set position; scale: 2;"
+            id="setLightPosition"
+          ></a-entity>
+          <a-plane
+            color="white"
+            opacity="0.5"
+            width="0.5"
+            height="0.8"
+            position="0 0 -0.001"
+            material="shader: flat;"
+          ></a-plane>
+        </a-entity>
+
+        <a-entity data-ui-menu="demos">
+          <a-entity
+            position="0 0.16 0"
+            dynamic-text="text: back; scale: 2;"
+          ></a-entity>
+          <a-entity
+            position="0 0.08 0"
+            dynamic-text="text: none; scale: 2;"
+          ></a-entity>
+          <a-entity
+            position="0 0.0 0"
+            dynamic-text="text: glow; scale: 2;"
+          ></a-entity>
+          <a-entity
+            position="0 -0.08 0"
+            dynamic-text="text: gaze; scale: 2;"
+          ></a-entity>
+          <a-entity
+            position="0 -0.16 0"
+            dynamic-text="text: flashlight; scale: 2;"
+          ></a-entity>
+          <a-entity
+            position="0 -0.24 0"
+            dynamic-text="text: torch; scale: 2;"
+          ></a-entity>
+          <a-plane
+            color="white"
+            opacity="0.5"
+            width="0.3"
+            height="0.6"
+            position="0 0 -0.001"
+            material="shader: flat;"
+          ></a-plane>
+        </a-entity>
+      </a-entity>
+
+      <a-entity visible="false" id="anchor">
+        <a-box scale="0.01 0.01 0.01" color="red" visible="false"></a-box>
+        <a-entity position="0 -0.2 -0.1">
+          <a-entity
+            unlit
+            gltf-model="#anchorModel"
+            scale="0.020 0.020 0.020"
+            position="0 0.119 0"
+            rotation="0 0 0"
+          ></a-entity>
+        </a-entity>
+      </a-entity>
+
+      <a-entity
+        cursor="rayOrigin: mouse;"
+        raycaster="objects: .raycastable"
+        id="cursor"
+      ></a-entity>
+
+      <a-camera position="0 1.6 0" id="camera">
+        <a-entity id="hud" position="0 0 -0.4">
+          <a-entity dynamic-text id="hintText" position="0 0.12 0"></a-entity>
+        </a-entity>
+        <a-entity id="cameraForward" position="0 0 -0.6"></a-entity>
+      </a-camera>
+
+      <a-entity
+        id="leftHandLaserControls"
+        laser-controls-new="hand: left; model: false;"
+        raycaster="objects: .raycastable"
+      ></a-entity>
+      <a-entity
+        id="rightHandLaserControls"
+        laser-controls-new="hand: right; model: false;"
+        raycaster="objects: .raycastable"
+      ></a-entity>
+
+      <a-entity
+        id="leftHandControls"
+        oculus-touch-controls="hand: left; model: false;"
+        camera-controls="hand: left;"
+      ></a-entity>
+      <a-entity
+        id="rightHandControls"
+        oculus-touch-controls="hand: right; model: false;"
+        camera-controls="hand: right;"
+      >
+        <a-box visible="false" color="red" scale="0.01 0.01 0.01"></a-box>
+        <a-entity
+          id="torch"
+          gltf-model="#torchModel"
+          visible="false"
+          scale="5 5 5"
+          rotation="-97.4 0 6"
+          position="0.015 0 0.1"
+        ></a-entity>
+        <a-entity
+          id="torchFlame"
+          visible="false"
+          position="-0.035 -0.058 -0.36"
+        >
+          <a-sphere color="red" radius="0.01"></a-sphere>
+        </a-entity>
+        <a-entity
+          id="flashlightForward"
+          visible="false"
+          position="-0.018 -0.06 -0.14"
+        >
+          <a-sphere color="red" radius="0.01"></a-sphere>
+        </a-entity>
+        <a-sphere visible="false" color="red" radius="0.01"></a-sphere>
+        <a-entity
+          id="flashlight"
+          gltf-model="#flashlightModel"
+          visible="false"
+          position="0.03 0.04 0.15"
+          scale="0.03 0.03 0.03"
+          rotation="-109 0 8.6"
+        ></a-entity>
+        <a-entity position="0 -0.2 -0.1" id="handAnchor" visible="false">
+          <a-entity
+            gltf-model="#anchorModel"
+            unlit
+            scale="0.020 0.020 0.020"
+            position="0 0.119 0"
+            rotation="0 0 0"
+          ></a-entity>
+        </a-entity>
+      </a-entity>
+
+      <a-entity id="sceneContainer" position="0 0 0">
+        <a-entity id="internalAnchor" position="0 0 0" visible="false">
+          <a-entity position="0 -0.2 -0.1">
+            <a-entity
+              gltf-model="#anchorModel"
+              unlit
+              scale="0.020 0.020 0.020"
+              position="0 0.119 0"
+              rotation="0 0 0"
+            ></a-entity>
+          </a-entity>
+        </a-entity>
+      </a-entity>
+    </a-scene>
+  </body>
+</html>

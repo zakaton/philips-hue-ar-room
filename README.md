@@ -1,29 +1,20 @@
 # philips-hue-ar-room
 
-On macOS:
-for the security stuff, run the command in the terminal:
-`sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./key.pem -out cert.pem`
+[Video](https://youtu.be/qkAcXrHKRoc)  
+[Tutorial](https://youtu.be/8_pULl4RjWY)
+
+On macOS:  
+for the security stuff, run the command in the terminal:  
+`sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./sec/key.pem -out ./sec/cert.pem`
 Windows is the same but without `sudo`, if you have openssl installed
 
-put the \*.pem files in the /sec/ folder
-
-also create a file `philips-hue-credentials.js` based on `_philips-hue-credentials.js` with your philips hue credentials
-
-also comment out lines 32 and 44 of hue-bridge.js under /node_modules/phea/build/hue-bridge.js for group id's outside the range
-
-also rewrite line 58 of phea-engine.js to:
-
-```
-const light = this.lights.find(({id}) => id == lightId)
-                light.transitionColor(rgb, tweenTime);
-```
-
-turn firewall off
-
-add "room.glb" to /public/assets
-
-install https://code.visualstudio.com/ & https://nodejs.org/en/
-install npm in terminal: sudo npm install
-install yarn in VS Code terminal: yarn install
-start localhost: yarn start
+install https://code.visualstudio.com/ & https://nodejs.org/en/  
+install npm in terminal: sudo npm install  
+install yarn in VS Code terminal: yarn install  
+start localhost: yarn start (try sudo yarn start if that doesn't work)  
 open https://localhost/ in chrome
+
+if it doesn't work, try turning the firewall off
+
+if you have issues saving or running stuff on mac, try:  
+`sudo chown -R username directory_name`
