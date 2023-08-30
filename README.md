@@ -12,3 +12,6 @@ start localhost: yarn start (try sudo yarn start if that doesn't work)
 open https://localhost/ in chrome
 
 if it doesn't work, try turning the firewall off
+
+if you have issues saving or running stuff on mac, try:  
+`sudo chown -R username directory_name`

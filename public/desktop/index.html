@@ -64,7 +64,7 @@
     socket.on("bridges", (_bridges) => {
       bridges = _bridges;
       bridgesContainer.innerHTML = "";
-      bridges.forEach((bridge) => {
+      bridges.forEach((bridge, bridgeIndex) => {
         const bridgeContainer = bridgeTemplate.content
           .cloneNode(true)
           .querySelector(".bridge");
@@ -116,7 +116,7 @@
                 socket.emit("setLights", {
                   lights: [
                     {
-                      bridgeId: bridge.id,
+                      bridgeId: bridgeIndex,
                       lightId,
                       color: rgb,
                     },
