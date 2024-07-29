@@ -1,12 +1,14 @@
 var express = require("express");
 var https = require("https");
 var http = require("http");
-var app = express();
 const { Server } = require("socket.io");
 var fs = require("fs");
 const Phea = require("./phea/phea");
 const mdns = require("mdns");
 const _ = require("lodash");
+const ip = require("ip");
+
+var app = express();
 
 process.on("SIGINT", () => {
   // Stop example with ctrl+c
@@ -24,10 +26,7 @@ process.on("SIGINT", () => {
 let philipsHueBridgesInformation;
 async function getPhilipsHueBridgesInformation() {
   try {
-    const data = await fs.promises.readFile(
-      "philips-hue-bridges-information.json",
-      "utf8"
-    );
+    const data = await fs.promises.readFile("philips-hue-bridges-information.json", "utf8");
     philipsHueBridgesInformation = JSON.parse(data);
     console.log("philipsHueBridgesInformation", philipsHueBridgesInformation);
   } catch (error) {
@@ -37,10 +36,7 @@ async function getPhilipsHueBridgesInformation() {
 }
 async function _savePhilipsHueBridgesInformation() {
   try {
-    console.log(
-      "save philipsHueBridgesInformation",
-      philipsHueBridgesInformation
-    );
+    console.log("save philipsHueBridgesInformation", philipsHueBridgesInformation);
     await fs.promises.writeFile(
       "philips-hue-bridges-information.json",
       JSON.stringify(philipsHueBridgesInformation, null, 2),
@@ -203,7 +199,7 @@ async function setupBridges() {
 }
 setupBridges();
 
-var options = {
+var serverOptions = {
   key: fs.readFileSync("./sec/key.pem"),
   cert: fs.readFileSync("./sec/cert.pem"),
 };
@@ -214,13 +210,12 @@ app.use(function (req, res, next) {
 
   next();
 });
-app.use(express.static("public"));
 
 const httpServer = http.createServer(app);
-httpServer.listen(80);
-const httpsServer = https.createServer(options, app);
-httpsServer.listen(443, () => {
-  console.log("server listening on https://localhost");
+httpServer.listen(82);
+const httpsServer = https.createServer(serverOptions, app);
+httpsServer.listen(445, () => {
+  console.log(`server listening on https://${ip.address()}:${httpServer.address().port}`);
 });
 
 const io = new Server(httpsServer, {
@@ -291,8 +286,7 @@ io.on("connection", (socket) => {
         if (position) {
           //console.log(`setting ${bridgeId}:${lightId} position to ${position}...`);
           bridge.lights[lightId].position = position;
-          philipsHueBridgesInformation[bridge.id].lights[lightId].position =
-            position;
+          philipsHueBridgesInformation[bridge.id].lights[lightId].position = position;
           didUpdatePosition = true;
         }
       }
