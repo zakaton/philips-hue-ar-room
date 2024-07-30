@@ -18,9 +18,7 @@
             <li>id: <b class="id"></b></li>
             <li>ip: <b class="ip"></b></li>
             <li>credentials: <b class="credentials"></b></li>
-            <button class="getCredentials" hidden>
-              get credentials (press bridge button first)
-            </button>
+            <button class="getCredentials" hidden>get credentials (press bridge button first)</button>
             <li>lights: <b class="lights"></b></li>
             <li>group: <b class="group"></b></li>
             <button class="getGroup" hidden>refresh group</button>
@@ -38,6 +36,8 @@
   </body>
   <script>
     const socket = io();
+    console.log(socket);
+    window.socket = socket;
     socket.on("connect", () => {
       console.log("connection opened");
       socketConnectionContainer.innerText = "connected to server";
@@ -47,8 +47,7 @@
       socketConnectionContainer.innerText = "disconnected from server";
     });
 
-    const socketConnectionContainer =
-      document.getElementById("socketConnection");
+    const socketConnectionContainer = document.getElementById("socketConnection");
 
     const discoverBridgesButton = document.getElementById("discoverBridges");
     discoverBridgesButton.addEventListener("click", () => {
@@ -65,9 +64,7 @@
       bridges = _bridges;
       bridgesContainer.innerHTML = "";
       bridges.forEach((bridge, bridgeIndex) => {
-        const bridgeContainer = bridgeTemplate.content
-          .cloneNode(true)
-          .querySelector(".bridge");
+        const bridgeContainer = bridgeTemplate.content.cloneNode(true).querySelector(".bridge");
         for (const key in bridge) {
           let value = bridge[key];
           if (typeof value == "object") {
@@ -79,11 +76,9 @@
           }
         }
         if (!bridge.credentials) {
-          const credentialsContainer =
-            bridgeContainer.querySelector(`.credentials`);
+          const credentialsContainer = bridgeContainer.querySelector(`.credentials`);
           credentialsContainer.parentElement.setAttribute("hidden", "");
-          const getCredentialsButton =
-            bridgeContainer.querySelector(".getCredentials");
+          const getCredentialsButton = bridgeContainer.querySelector(".getCredentials");
           getCredentialsButton.removeAttribute("hidden");
           getCredentialsButton.addEventListener("click", () => {
             socket.emit("getCredentials", bridge.ip, (credentials) => {
@@ -101,28 +96,23 @@
         const onGroupUpdate = () => {
           lightsContainer.innerHTML = "";
           for (const lightId in bridge.group.lights) {
-            const lightContainer = lightTemplate.content
-              .cloneNode(true)
-              .querySelector(".light");
+            const lightContainer = lightTemplate.content.cloneNode(true).querySelector(".light");
             lightContainer.setAttribute("value", lightId);
 
-            lightContainer.querySelector(".name").innerText =
-              bridge.lights[lightId].name;
-            lightContainer
-              .querySelector("input")
-              .addEventListener("input", (event) => {
-                const value = event.target.value;
-                const rgb = htmlColorToRgbArray(value);
-                socket.emit("setLights", {
-                  lights: [
-                    {
-                      bridgeId: bridgeIndex,
-                      lightId,
-                      color: rgb,
-                    },
-                  ],
-                });
+            lightContainer.querySelector(".name").innerText = bridge.lights[lightId].name;
+            lightContainer.querySelector("input").addEventListener("input", (event) => {
+              const value = event.target.value;
+              const rgb = htmlColorToRgbArray(value);
+              socket.emit("setLights", {
+                lights: [
+                  {
+                    bridgeId: bridgeIndex,
+                    lightId,
+                    color: rgb,
+                  },
+                ],
               });
+            });
             lightsContainer.appendChild(lightContainer);
           }
         };

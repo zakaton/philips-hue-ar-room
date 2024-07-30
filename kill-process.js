@@ -2,7 +2,7 @@ const { exec } = require("child_process");
 
 // Get the port from command-line arguments or set a default value
 const args = process.argv.slice(2);
-const portToFree = args.length === 1 ? parseInt(args[0], 10) : 82;
+const portToFree = args.length === 1 ? parseInt(args[0], 10) : 8080;
 
 if (isNaN(portToFree) || portToFree <= 0 || portToFree > 65535) {
   console.error("Invalid port number");

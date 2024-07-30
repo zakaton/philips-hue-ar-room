@@ -210,12 +210,15 @@ app.use(function (req, res, next) {
 
   next();
 });
+app.use(express.static("./public"));
 
 const httpServer = http.createServer(app);
-httpServer.listen(82);
+httpServer.listen(8080, () => {
+  console.log(`http server listening on http://${ip.address()}:${httpServer.address().port}`);
+});
 const httpsServer = https.createServer(serverOptions, app);
-httpsServer.listen(445, () => {
-  console.log(`server listening on https://${ip.address()}:${httpServer.address().port}`);
+httpsServer.listen(8443, () => {
+  console.log(`https server listening on https://${ip.address()}:${httpsServer.address().port}`);
 });
 
 const io = new Server(httpsServer, {
