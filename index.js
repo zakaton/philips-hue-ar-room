@@ -281,7 +281,7 @@ io.on("connection", (socket) => {
         if (color) {
           const _bridge = _bridges[bridge.id];
           if (_bridge) {
-            //console.log(`setting ${bridgeId}:${lightId} light to ${color}...`);
+            console.log(`setting ${bridgeId}:${lightId} light to ${color}...`);
             _bridge.transition(lightId, color);
           }
         }
@@ -292,6 +292,8 @@ io.on("connection", (socket) => {
           philipsHueBridgesInformation[bridge.id].lights[lightId].position = position;
           didUpdatePosition = true;
         }
+      } else {
+        console.error(`couldn't find bridge "${bridgeId}"`);
       }
     });
     if (didUpdatePosition) {

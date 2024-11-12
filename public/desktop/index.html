@@ -61,6 +61,7 @@
 
     let bridges = [];
     socket.on("bridges", (_bridges) => {
+      console.log("bridges", _bridges);
       bridges = _bridges;
       bridgesContainer.innerHTML = "";
       bridges.forEach((bridge, bridgeIndex) => {
